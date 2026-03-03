@@ -1,0 +1,3353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealthFusion AI — Intelligent Health Platform</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Fira+Code:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <style>
+    :root {
+      --ink: #060d1a;
+      --ink2: #0f1e35;
+      --surface: #0b1628;
+      --glass: rgba(255, 255, 255, .035);
+      --glass2: rgba(255, 255, 255, .07);
+      --border: rgba(255, 255, 255, .08);
+      --border2: rgba(255, 255, 255, .14);
+      --teal: #00e5c3;
+      --teal2: #00bfa5;
+      --amber: #ffb347;
+      --rose: #ff4e6a;
+      --violet: #a78bfa;
+      --sky: #38bdf8;
+      --text: #dce8f0;
+      --muted: rgba(220, 232, 240, .45);
+      --muted2: rgba(220, 232, 240, .25);
+      --sidebar-w: 260px;
+      --r: 16px;
+      --r-sm: 10px;
+      --sh: 0 8px 32px rgba(0, 0, 0, .4);
+      --sh-glow: 0 0 40px rgba(0, 229, 195, .12);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      background: var(--ink);
+      color: var(--text);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* CURSOR */
+    #cur {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: var(--teal);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      mix-blend-mode: screen;
+      transition: width .15s, height .15s;
+    }
+
+    #cur-r {
+      position: fixed;
+      width: 36px;
+      height: 36px;
+      border: 1.5px solid rgba(0, 229, 195, .35);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: all .12s ease;
+    }
+
+    /* CANVAS */
+    #bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: .45;
+    }
+
+    /* LAYOUT */
+    .app {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: rgba(6, 13, 26, .9);
+      backdrop-filter: blur(24px);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      z-index: 200;
+      overflow: hidden;
+    }
+
+    .sidebar-brand {
+      padding: 2rem 1.6rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-dna {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 12px var(--teal));
+    }
+
+    .brand-text {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.35rem;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .brand-text span {
+      color: var(--teal);
+    }
+
+    .brand-sub {
+      font-size: .6rem;
+      color: var(--muted2);
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .sys-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .65rem;
+      color: var(--muted2);
+      letter-spacing: .08em;
+      margin-top: .9rem;
+    }
+
+    .sys-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 8px #34d399;
+      animation: blink 2.5s infinite;
+    }
+
+    .sys-dot.offline {
+      background: #ff4e6a;
+      box-shadow: 0 0 8px #ff4e6a;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: .3;
+      }
+    }
+
+    .nav-section {
+      padding: .8rem 1rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-label {
+      font-size: .58rem;
+      color: var(--muted2);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      padding: .5rem .6rem;
+      margin-bottom: 2px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: .65rem .9rem;
+      border-radius: var(--r-sm);
+      font-size: .85rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+      border: 1px solid transparent;
+      margin-bottom: 2px;
+      user-select: none;
+    }
+
+    .nav-item:hover {
+      background: var(--glass2);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .nav-item.active {
+      background: rgba(0, 229, 195, .1);
+      color: var(--teal);
+      border-color: rgba(0, 229, 195, .25);
+      font-weight: 600;
+    }
+
+    .nav-item.active .nav-icon {
+      filter: drop-shadow(0 0 8px var(--teal));
+    }
+
+    .nav-icon {
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--rose);
+      color: #fff;
+      font-size: .58rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    .sidebar-footer {
+      padding: 1rem 1.6rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: .8rem;
+    }
+
+    .user-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), var(--sky));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: .9rem;
+      color: #000;
+      flex-shrink: 0;
+    }
+
+    .user-name {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .user-role {
+      font-size: .65rem;
+      color: var(--muted2);
+    }
+
+    .logout-btn {
+      width: 100%;
+      background: rgba(255, 78, 106, .1);
+      border: 1px solid rgba(255, 78, 106, .25);
+      color: var(--rose);
+      padding: .5rem;
+      border-radius: var(--r-sm);
+      font-size: .78rem;
+      cursor: pointer;
+      font-family: 'Bricolage Grotesque', sans-serif;
+      transition: all .2s;
+      font-weight: 500;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 78, 106, .2);
+    }
+
+    /* MAIN */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(6, 13, 26, .8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: .9rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topbar-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.2rem;
+      color: var(--text);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+    }
+
+    .topbar-time {
+      font-family: 'Fira Code', monospace;
+      font-size: .75rem;
+      color: var(--muted);
+      background: var(--glass2);
+      border: 1px solid var(--border);
+      padding: .35rem .8rem;
+      border-radius: var(--r-sm);
+    }
+
+    .api-status {
+      font-size: .65rem;
+      padding: .35rem .8rem;
+      border-radius: var(--r-sm);
+      border: 1px solid;
+      font-family: 'Fira Code', monospace;
+      font-weight: 600;
+    }
+
+    .api-status.ok {
+      background: rgba(0, 229, 195, .1);
+      color: var(--teal);
+      border-color: rgba(0, 229, 195, .25);
+    }
+
+    .api-status.err {
+      background: rgba(255, 78, 106, .1);
+      color: var(--rose);
+      border-color: rgba(255, 78, 106, .25);
+    }
+
+    /* CONTENT */
+    .content {
+      padding: 2rem 2.5rem;
+      flex: 1;
+    }
+
+    .page {
+      display: none;
+      animation: fadeIn .4s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* PAGE HEADER */
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-eyebrow {
+      font-size: .65rem;
+      color: var(--teal);
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      margin-bottom: .4rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .page-eyebrow::before {
+      content: '';
+      width: 20px;
+      height: 1px;
+      background: var(--teal);
+    }
+
+    .page-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 2.4rem;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: .3rem;
+    }
+
+    .page-sub {
+      font-size: .9rem;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 1.5rem;
+      backdrop-filter: blur(12px);
+      transition: border-color .25s, transform .25s, box-shadow .25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
+      box-shadow: var(--sh);
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .08), transparent);
+      pointer-events: none;
+    }
+
+    .card-teal {
+      border-top: 2px solid var(--teal);
+    }
+
+    .card-rose {
+      border-top: 2px solid var(--rose);
+    }
+
+    .card-amber {
+      border-top: 2px solid var(--amber);
+    }
+
+    .card-violet {
+      border-top: 2px solid var(--violet);
+    }
+
+    .card-sky {
+      border-top: 2px solid var(--sky);
+    }
+
+    /* GRID */
+    .g2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    .g3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    .g4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.2rem;
+    }
+
+    /* METRIC */
+    .metric {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 1.4rem 1.6rem;
+      transition: all .25s;
+    }
+
+    .metric:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
+    }
+
+    .metric-icon {
+      font-size: 1.6rem;
+      margin-bottom: .6rem;
+    }
+
+    .metric-val {
+      font-family: 'Instrument Serif', serif;
+      font-size: 2.4rem;
+      color: #fff;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    .metric-label {
+      font-size: .7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-top: .3rem;
+    }
+
+    .metric-change {
+      font-size: .75rem;
+      margin-top: .4rem;
+      font-weight: 600;
+    }
+
+    .up {
+      color: var(--teal);
+    }
+
+    /* BADGE */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .badge-safe {
+      background: rgba(0, 229, 195, .1);
+      color: var(--teal);
+      border: 1px solid rgba(0, 229, 195, .25);
+    }
+
+    .badge-warn {
+      background: rgba(255, 179, 71, .1);
+      color: var(--amber);
+      border: 1px solid rgba(255, 179, 71, .25);
+    }
+
+    .badge-high {
+      background: rgba(255, 100, 0, .1);
+      color: #ff7043;
+      border: 1px solid rgba(255, 100, 0, .25);
+    }
+
+    .badge-crit {
+      background: rgba(255, 78, 106, .1);
+      color: var(--rose);
+      border: 1px solid rgba(255, 78, 106, .25);
+    }
+
+    .badge-info {
+      background: rgba(56, 189, 248, .1);
+      color: var(--sky);
+      border: 1px solid rgba(56, 189, 248, .25);
+    }
+
+    .badge-violet {
+      background: rgba(167, 139, 250, .1);
+      color: var(--violet);
+      border: 1px solid rgba(167, 139, 250, .25);
+    }
+
+    /* FORM */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+    }
+
+    .form-label {
+      font-size: .72rem;
+      color: var(--muted);
+      letter-spacing: .06em;
+      font-weight: 600;
+    }
+
+    .form-input,
+    .form-select {
+      background: rgba(255, 255, 255, .05);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: .65rem .9rem;
+      color: var(--text);
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: .88rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      width: 100%;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(0, 229, 195, .12);
+    }
+
+    .form-input::placeholder {
+      color: var(--muted2);
+    }
+
+    .form-select option {
+      background: #0f1e35;
+      color: var(--text);
+    }
+
+    /* BUTTONS */
+    .btn {
+      padding: .7rem 1.8rem;
+      border-radius: var(--r-sm);
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: .88rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all .25s;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      letter-spacing: .02em;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--teal), var(--sky));
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 229, 195, .3);
+    }
+
+    .btn-primary:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border2);
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+    }
+
+    .btn-full {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* PROGRESS */
+    .prog-wrap {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, .07);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .prog-bar {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 1.5s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    /* SHAP */
+    .shap-row {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      margin-bottom: .5rem;
+    }
+
+    .shap-name {
+      font-size: .75rem;
+      color: var(--muted);
+      min-width: 130px;
+      text-align: right;
+    }
+
+    .shap-track {
+      flex: 1;
+      height: 8px;
+      background: rgba(255, 255, 255, .06);
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .shap-val {
+      font-size: .7rem;
+      font-family: 'Fira Code', monospace;
+      min-width: 55px;
+      color: var(--muted);
+    }
+
+    /* SYMPTOM PILLS */
+    .symptom-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+      max-height: 220px;
+      overflow-y: auto;
+      padding: .5rem;
+    }
+
+    .symptom-pill {
+      padding: .3rem .75rem;
+      border-radius: 20px;
+      font-size: .7rem;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      transition: all .2s;
+      user-select: none;
+    }
+
+    .symptom-pill:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+    }
+
+    .symptom-pill.selected {
+      background: rgba(0, 229, 195, .12);
+      border-color: var(--teal);
+      color: var(--teal);
+      font-weight: 600;
+    }
+
+    /* UPLOAD ZONE */
+    .upload-zone {
+      border: 2px dashed var(--border2);
+      border-radius: var(--r);
+      padding: 2.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all .25s;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.drag {
+      border-color: var(--teal);
+      background: rgba(0, 229, 195, .04);
+    }
+
+    .upload-zone input {
+      display: none;
+    }
+
+    .upload-img-preview {
+      width: 100%;
+      max-height: 240px;
+      object-fit: cover;
+      border-radius: var(--r-sm);
+      margin-top: 1rem;
+    }
+
+    /* DISEASE RESULT */
+    .disease-result {
+      background: linear-gradient(135deg, rgba(0, 229, 195, .06), rgba(56, 189, 248, .06));
+      border: 1px solid rgba(0, 229, 195, .2);
+      border-radius: var(--r);
+      padding: 1.8rem;
+    }
+
+    .disease-name {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.8rem;
+      color: #fff;
+      margin-bottom: .4rem;
+    }
+
+    .confidence-num {
+      font-family: 'Instrument Serif', serif;
+      font-size: 3rem;
+      color: var(--teal);
+      line-height: 1;
+    }
+
+    /* TOP3 */
+    .top3-row {
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: .7rem 1rem;
+      margin-bottom: .5rem;
+    }
+
+    .top3-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: .35rem;
+      font-size: .82rem;
+    }
+
+    .top3-pct {
+      font-family: 'Fira Code', monospace;
+      color: var(--teal);
+    }
+
+    /* TABS */
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.2rem;
+      gap: .2rem;
+    }
+
+    .tab-btn {
+      padding: .5rem 1rem;
+      font-size: .78rem;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .2s;
+      font-family: 'Bricolage Grotesque', sans-serif;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      font-weight: 500;
+    }
+
+    .tab-btn.active {
+      color: var(--teal);
+      border-bottom-color: var(--teal);
+      font-weight: 600;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: .7rem;
+      padding: .6rem .9rem;
+      background: rgba(255, 255, 255, .03);
+      border-left: 2px solid var(--teal);
+      border-radius: 0 var(--r-sm) var(--r-sm) 0;
+      margin-bottom: .4rem;
+      font-size: .83rem;
+      line-height: 1.55;
+      color: var(--text);
+    }
+
+    /* ALERT */
+    .alert-banner {
+      background: rgba(255, 78, 106, .07);
+      border: 1px solid rgba(255, 78, 106, .25);
+      border-radius: var(--r);
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      animation: pulseBorder 2s infinite;
+    }
+
+    @keyframes pulseBorder {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 78, 106, .15);
+      }
+
+      50% {
+        box-shadow: 0 0 0 8px rgba(255, 78, 106, 0);
+      }
+    }
+
+    .alert-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .alert-title {
+      font-weight: 700;
+      color: var(--rose);
+      font-size: .9rem;
+      margin-bottom: .2rem;
+    }
+
+    .alert-body {
+      font-size: .82rem;
+      color: rgba(220, 232, 240, .7);
+      line-height: 1.6;
+    }
+
+    /* SECTION LABEL */
+    .sec-lbl {
+      font-size: .65rem;
+      color: var(--teal);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .sec-lbl::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* SIM BOX */
+    .sim-box {
+      background: rgba(0, 229, 195, .04);
+      border: 1px solid rgba(0, 229, 195, .15);
+      border-radius: var(--r);
+      padding: 1.5rem;
+    }
+
+    .sim-result {
+      text-align: center;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(0, 0, 0, .3);
+      border-radius: var(--r-sm);
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, .1);
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--teal);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0, 229, 195, .4);
+    }
+
+    /* FORMULA */
+    .formula-box {
+      background: rgba(0, 0, 0, .3);
+      border: 1px solid var(--border2);
+      border-radius: var(--r-sm);
+      padding: 1rem 1.5rem;
+      text-align: center;
+      font-family: 'Fira Code', monospace;
+      font-size: 1rem;
+      color: var(--teal);
+    }
+
+    /* LOADER */
+    .loader {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(0, 229, 195, .2);
+      border-top-color: var(--teal);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* TOAST */
+    .toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 9000;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+
+    .toast {
+      background: rgba(11, 22, 40, .95);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: .8rem 1.2rem;
+      font-size: .82rem;
+      color: var(--text);
+      backdrop-filter: blur(12px);
+      animation: slideIn .3s ease;
+      max-width: 320px;
+    }
+
+    .toast.success {
+      border-color: rgba(0, 229, 195, .4);
+      color: var(--teal);
+    }
+
+    .toast.error {
+      border-color: rgba(255, 78, 106, .4);
+      color: var(--rose);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* FEAT CARDS (About) */
+    .feat-card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 1.8rem;
+      transition: all .3s;
+    }
+
+    .feat-card:hover {
+      border-color: var(--teal);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 229, 195, .08);
+    }
+
+    .feat-icon {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .feat-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.1rem;
+      color: #fff;
+      margin-bottom: .5rem;
+    }
+
+    .feat-desc {
+      font-size: .82rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* RISK SCALE */
+    .risk-scale {
+      display: flex;
+      gap: 4px;
+      margin-top: .8rem;
+    }
+
+    .risk-seg {
+      flex: 1;
+      height: 8px;
+      border-radius: 4px;
+    }
+
+    /* AUTH */
+    .auth-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(11, 22, 40, .9);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      backdrop-filter: blur(20px);
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .auth-logo-icon {
+      font-size: 3rem;
+      filter: drop-shadow(0 0 20px var(--teal));
+      margin-bottom: .8rem;
+    }
+
+    .auth-logo-name {
+      font-family: 'Instrument Serif', serif;
+      font-size: 2rem;
+      color: #fff;
+    }
+
+    .auth-logo-name span {
+      color: var(--teal);
+    }
+
+    .auth-sub {
+      font-size: .8rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: .3rem;
+    }
+
+    .auth-tabs {
+      display: flex;
+      background: rgba(255, 255, 255, .05);
+      border-radius: var(--r-sm);
+      padding: 3px;
+      margin-bottom: 1.5rem;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: .5rem;
+      text-align: center;
+      font-size: .8rem;
+      cursor: pointer;
+      border-radius: 7px;
+      transition: all .2s;
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-weight: 500;
+      color: var(--muted);
+      background: none;
+      border: none;
+    }
+
+    .auth-tab.active {
+      background: var(--glass2);
+      color: var(--text);
+    }
+
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: flex;
+      flex-direction: column;
+      gap: .9rem;
+    }
+
+    /* TIMELINE */
+    .tl-row {
+      display: flex;
+      gap: .9rem;
+      margin-bottom: .8rem;
+    }
+
+    .tl-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .tl-dot.teal {
+      background: var(--teal);
+      box-shadow: 0 0 8px var(--teal);
+    }
+
+    .tl-dot.rose {
+      background: var(--rose);
+      box-shadow: 0 0 8px var(--rose);
+    }
+
+    .tl-dot.amber {
+      background: var(--amber);
+      box-shadow: 0 0 8px var(--amber);
+    }
+
+    .tl-time {
+      font-size: .68rem;
+      color: var(--muted2);
+      margin-bottom: .1rem;
+      font-family: 'Fira Code', monospace;
+    }
+
+    .tl-text {
+      font-size: .82rem;
+      color: var(--text);
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 229, 195, .2);
+      border-radius: 2px;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+
+    .reveal.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─────────────────────────────────────────────
+       HYBRID AI HEALTH ASSISTANT CHATBOT 
+       ───────────────────────────────────────────── */
+    .chatbot-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: none;
+      z-index: 1000;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: none;
+    }
+
+    .chatbot-btn:hover {
+      transform: scale(1.1) translateY(-5px);
+      box-shadow: none;
+    }
+
+    .chatbot-panel {
+      position: fixed;
+      bottom: 6rem;
+      right: 2rem;
+      width: 380px;
+      height: 550px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 229, 195, 0.1);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .chatbot-panel.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .chat-header {
+      padding: 1.2rem;
+      background: rgba(0, 229, 195, 0.05);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-header h3 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.4rem;
+      color: #fff;
+      margin: 0;
+      line-height: 1;
+    }
+
+    .chat-header h3 span {
+      color: var(--teal);
+    }
+
+    .close-chat {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: color 0.2s;
+    }
+
+    .close-chat:hover {
+      color: var(--rose);
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--teal) var(--surface);
+    }
+
+    .chat-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: var(--teal);
+      border-radius: 4px;
+    }
+
+    .chat-disclaimer {
+      font-size: 0.75rem;
+      color: var(--amber);
+      background: rgba(255, 179, 71, 0.1);
+      border: 1px solid rgba(255, 179, 71, 0.2);
+      padding: 0.8rem;
+      border-radius: var(--r-sm);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .msg-bubble {
+      max-width: 85%;
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .msg-bot {
+      background: rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .msg-bot p {
+      margin: 0 0 0.5em;
+    }
+
+    .msg-bot p:last-child {
+      margin: 0;
+    }
+
+    .msg-bot ul {
+      margin: 0.5em 0;
+      padding-left: 1.5em;
+    }
+
+    .msg-user {
+      background: rgba(0, 229, 195, 0.1);
+      color: var(--teal);
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+      border: 1px solid rgba(0, 229, 195, 0.2);
+    }
+
+    .chat-input-area {
+      padding: 1rem;
+      border-top: 1px solid var(--border);
+      background: var(--ink2);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 0.8rem 1rem;
+      border-radius: var(--r-sm);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .chat-input:focus {
+      border-color: var(--teal);
+    }
+
+    .chat-send {
+      background: var(--teal);
+      color: var(--ink);
+      border: none;
+      width: 40px;
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .chat-send:hover {
+      background: #00bfa5;
+      transform: translateY(-1px);
+    }
+
+    .chat-send:active {
+      transform: translateY(1px);
+    }
+
+    .typing-indicator {
+      display: none;
+      gap: 4px;
+      padding: 0.5rem 1rem;
+      align-self: flex-start;
+    }
+
+    .typing-indicator span {
+      width: 6px;
+      height: 6px;
+      background: var(--teal);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .typing-indicator span:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .typing-indicator span:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0);
+      }
+
+      40% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ─────────────────────────────────────────────
+     CHATBOT STYLES
+  ───────────────────────────────────────────── */
+    .chatbot-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 140px;
+      height: 140px;
+      background: transparent;
+      box-shadow: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 9999;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .chatbot-btn:hover {
+      transform: scale(1.1) rotate(-5deg);
+      box-shadow: none;
+    }
+
+    .chatbot-panel {
+      position: fixed;
+      bottom: 100px;
+      right: 30px;
+      width: 380px;
+      height: 550px;
+      max-height: calc(100vh - 120px);
+      background: rgba(10, 15, 25, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 229, 195, 0.2);
+      border-radius: var(--r-md);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 229, 195, 0.1);
+      display: flex;
+      flex-direction: column;
+      z-index: 9998;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    .chatbot-panel.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .chatbot-header {
+      padding: 1.2rem;
+      background: linear-gradient(to right, rgba(0, 229, 195, 0.1), transparent);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chatbot-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      scroll-behavior: smooth;
+    }
+
+    .chatbot-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .chatbot-messages::-webkit-scrollbar-thumb {
+      background: rgba(0, 229, 195, 0.2);
+      border-radius: 4px;
+    }
+
+    .bot-msg,
+    .user-msg {
+      max-width: 85%;
+      padding: 0.8rem 1rem;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      animation: fadeIn .3s ease forwards;
+    }
+
+    .bot-msg {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 2px 12px 12px 12px;
+      border-left: 2px solid var(--teal);
+    }
+
+    .user-msg {
+      align-self: flex-end;
+      background: rgba(0, 229, 195, 0.1);
+      color: #fff;
+      border-radius: 12px 2px 12px 12px;
+    }
+
+    .chatbot-input {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .chatbot-input input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 0.8rem 1rem;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .chatbot-input input:focus {
+      border-color: var(--teal);
+    }
+
+    .chatbot-input button {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--teal);
+      color: var(--surface);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .chatbot-input button:hover {
+      transform: scale(1.05);
+    }
+
+    .chatbot-input button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Typing Animation */
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      align-self: flex-start;
+      border-radius: 2px 12px 12px 12px;
+      align-items: center;
+    }
+
+    .typing-indicator span {
+      width: 6px;
+      height: 6px;
+      background: var(--teal);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .typing-indicator span:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .typing-indicator span:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0);
+      }
+
+      40% {
+        transform: scale(1);
+      }
+    }
+
+    .disclaimer-banner {
+      background: rgba(255, 179, 71, 0.08);
+      border-left: 2px solid var(--amber);
+      padding: 0.6rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.4;
+      margin-bottom: 0.5rem;
+    }
+
+    @media(max-width: 600px) {
+      .chatbot-panel {
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+        border: none;
+      }
+
+      .chatbot-btn {
+        bottom: 20px;
+        right: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="cur"></div>
+  <div id="cur-r"></div>
+  <canvas id="bg"></canvas>
+
+  <!-- AUTH PAGE -->
+  <div class="auth-wrap" id="authPage">
+    <canvas id="auth-bg" style="position:fixed;inset:0;z-index:0;opacity:.35;pointer-events:none;"></canvas>
+    <div class="auth-card reveal" style="position:relative;z-index:1;">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">🧬</div>
+        <div class="auth-logo-name">Health<span>Fusion</span></div>
+        <div class="auth-sub">Intelligent Health Risk &amp; Monitoring Platform</div>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')">Create Account</button>
+      </div>
+      <div class="auth-form active" id="loginForm">
+        <div class="form-group"><label class="form-label">Username</label><input class="form-input"
+            placeholder="Enter username" id="loginUser" /></div>
+        <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password"
+            placeholder="Enter password" id="loginPass" /></div>
+        <button class="btn btn-primary btn-full" onclick="doLogin()">Sign In →</button>
+        <!-- <div style="font-size:.72rem;color:var(--muted);text-align:center;">🔒 Demo: any username &amp; password</div> -->
+      </div>
+      <div class="auth-form" id="registerForm">
+        <div class="form-group"><label class="form-label">Username</label><input class="form-input"
+            placeholder="Your username" id="regUser" /></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input"
+            placeholder="your@email.com" id="regEmail" /></div>
+        <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password"
+            placeholder="Create password" id="regPass" /></div>
+        <button class="btn btn-primary btn-full" onclick="doRegister()">Create Account →</button>
+      </div>
+      <!-- <div style="margin-top:1.2rem;font-size:.68rem;color:var(--muted2);text-align:center;line-height:1.6;">🧬 For
+        informational purposes only.<br>Not a substitute for professional medical advice.</div> -->
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div class="app" id="mainApp" style="display:none;">
+
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-mark">
+          <span class="brand-dna">🧬</span>
+          <div>
+            <div class="brand-text">Health<span>Fusion</span></div>
+            <div class="brand-sub">AI Health Platform</div>
+          </div>
+        </div>
+        <div class="sys-status">
+          <div class="sys-dot" id="apiDot"></div><span>API: <span id="apiStatusText">Checking...</span></span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Main</div>
+        <div class="nav-item active" onclick="navigate('dashboard')" data-page="dashboard"><span
+            class="nav-icon">🏠</span> Dashboard</div>
+        <div class="nav-label">Analysis</div>
+        <div class="nav-item" onclick="navigate('heart')" data-page="heart"><span class="nav-icon">❤️</span> Heart
+          Disease <span class="nav-badge">AI</span></div>
+        <div class="nav-item" onclick="navigate('diabetes')" data-page="diabetes"><span class="nav-icon">🍬</span>
+          Diabetes Risk <span class="nav-badge">AI</span></div>
+        <div class="nav-item" onclick="navigate('disease')" data-page="disease"><span class="nav-icon">🩺</span> Disease
+          Checker</div>
+        <div class="nav-item" onclick="navigate('skin')" data-page="skin"><span class="nav-icon">🔬</span> Skin
+          Detection <span class="nav-badge">CNN</span></div>
+        <div class="nav-label">Insights</div>
+        <div class="nav-item" onclick="navigate('monitor')" data-page="monitor"><span class="nav-icon">📊</span> Risk
+          Monitor</div>
+        <div class="nav-item" onclick="navigate('reports')" data-page="reports"><span class="nav-icon">📄</span> Reports
+        </div>
+        <div class="nav-label">Info</div>
+        <div class="nav-item" onclick="navigate('about')" data-page="about"><span class="nav-icon">ℹ️</span> About</div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="user-row">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div>
+            <div class="user-name" id="userDisplayName">User</div>
+            <div class="user-role">Patient · Active</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()">↩ Sign Out</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <div class="topbar-right">
+          <div class="api-status" id="apiStatusBadge">⟳ Connecting...</div>
+          <div class="topbar-time" id="topbarTime">--:--:--</div>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <!-- DASHBOARD -->
+        <div class="page active" id="page-dashboard">
+          <div class="page-header">
+            <div class="page-eyebrow">Overview</div>
+            <div class="page-title">Welcome back, <span id="welcomeName" style="color:var(--teal);">User</span></div>
+            <div class="page-sub">Intelligent health risk assessment hub — powered by clinical ML models and explainable
+              AI.</div>
+          </div>
+          <div class="card card-teal reveal"
+            style="margin-bottom:1.5rem;background:linear-gradient(135deg,rgba(0,229,195,.06),rgba(56,189,248,.04));padding:2rem 2.2rem;">
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:.8rem;">
+              <span style="font-size:2.5rem;filter:drop-shadow(0 0 16px var(--teal));">🧬</span>
+              <div>
+                <div style="font-family:'Instrument Serif',serif;font-size:1.6rem;color:#fff;">HealthFusion AI Platform
+                </div>
+                <div style="font-size:.82rem;color:var(--muted);">Heart · Diabetes · 41-Disease Checker · CNN Skin
+                  Analysis — FastAPI Powered</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;">
+              <span class="badge badge-safe">✓ SHAP XAI</span>
+              <span class="badge badge-info">⚡ FastAPI Backend</span>
+              <span class="badge badge-violet">📊 Real ML Models</span>
+              <span class="badge badge-warn">🔬 CNN Vision AI</span>
+            </div>
+          </div>
+          <div class="g4 reveal" style="margin-bottom:1.5rem;">
+            <div class="metric">
+              <div class="metric-icon">🤖</div>
+              <div class="metric-val" id="dashModels" style="color:var(--teal);">—</div>
+              <div class="metric-label">Models Active</div>
+              <div class="metric-change up" id="dashModelsLabel">Checking...</div>
+            </div>
+            <!-- <div class="metric">
+              <div class="metric-icon">🎯</div>
+              <div class="metric-val" style="color:var(--sky);">99.7%</div>
+              <div class="metric-label">Peak Accuracy</div>
+              <div class="metric-change up">↑ Disease Checker</div>
+            </div> -->
+            <div class="metric">
+              <div class="metric-icon">🦠</div>
+              <div class="metric-val" style="color:var(--violet);">41</div>
+              <div class="metric-label">Diseases Covered</div>
+              <div class="metric-change up">+ 8 Skin Conditions</div>
+            </div>
+            <div class="metric">
+              <div class="metric-icon">🔬</div>
+              <div class="metric-val" style="color:var(--amber);">132</div>
+              <div class="metric-label">Symptom Markers</div>
+              <div class="metric-change up">↑ Comprehensive</div>
+            </div>
+          </div>
+          <div class="g3 reveal" style="margin-bottom:1.5rem;">
+            <div class="card card-rose" style="cursor:pointer;" onclick="navigate('heart')">
+              <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;"><span
+                  style="font-size:2rem;">❤️</span>
+                <div>
+                  <div style="font-weight:700;">Heart Disease</div><span class="badge badge-safe"
+                    style="font-size:.6rem;">85%+ Accuracy</span>
+                </div>
+              </div>
+              <div style="font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem;">Random Forest +
+                XGBoost on 13 cardiac features. UCI Cleveland dataset.</div>
+              <div style="text-align:right;font-size:.78rem;color:var(--rose);">Analyze →</div>
+            </div>
+            <div class="card card-amber" style="cursor:pointer;" onclick="navigate('diabetes')">
+              <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;"><span
+                  style="font-size:2rem;">🍬</span>
+                <div>
+                  <div style="font-weight:700;">Diabetes Risk</div><span class="badge badge-safe"
+                    style="font-size:.6rem;">80%+ Accuracy</span>
+                </div>
+              </div>
+              <div style="font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem;">XGBoost on PIMA
+                dataset. Insulin resistance detection.</div>
+              <div style="text-align:right;font-size:.78rem;color:var(--amber);">Analyze →</div>
+            </div>
+            <div class="card card-teal" style="cursor:pointer;" onclick="navigate('disease')">
+              <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;"><span
+                  style="font-size:2rem;">🩺</span>
+                <div>
+                  <div style="font-weight:700;">Disease Checker</div><span class="badge badge-safe"
+                    style="font-size:.6rem;">99.7% Accuracy</span>
+                </div>
+              </div>
+              <div style="font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem;">132-symptom model
+                for 41 diseases with medicine, diet &amp; workout.</div>
+              <div style="text-align:right;font-size:.78rem;color:var(--teal);">Check →</div>
+            </div>
+          </div>
+          <div class="g2 reveal">
+            <div class="card">
+              <div class="sec-lbl">📐 UHRI Formula</div>
+              <div style="font-size:.85rem;color:var(--muted);line-height:1.7;margin-bottom:1rem;">HealthFusion's
+                Unified Health Risk Index combines heart and diabetes probabilities.</div>
+              <div class="formula-box">UHRI = (Heart × 0.6) + (Diabetes × 0.4)</div>
+              <div class="risk-scale" style="margin-top:1rem;">
+                <div class="risk-seg" style="background:var(--teal);opacity:.7;"></div>
+                <div class="risk-seg" style="background:var(--amber);opacity:.7;"></div>
+                <div class="risk-seg" style="background:#ff7043;opacity:.7;"></div>
+                <div class="risk-seg" style="background:var(--rose);opacity:.7;"></div>
+              </div>
+              <div style="display:flex;gap:.5rem;margin-top:.6rem;flex-wrap:wrap;"><span class="badge badge-safe">0–30%
+                  Safe</span><span class="badge badge-warn">30–60% Monitor</span><span class="badge badge-high">60–80%
+                  High</span><span class="badge badge-crit">80%+ Critical</span></div>
+            </div>
+            <div class="card">
+              <div class="sec-lbl">📈 Live Health Trend</div><canvas id="dashTrendChart" height="140"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- HEART -->
+        <div class="page" id="page-heart">
+          <div class="page-header">
+            <div class="page-eyebrow">AI Analysis</div>
+            <div class="page-title">❤️ Heart Disease<br><em style="color:var(--rose);">Risk Assessment</em></div>
+            <div class="page-sub">13 cardiac features analyzed using Random Forest + XGBoost with real SHAP
+              explainability.</div>
+          </div>
+          <div class="g2 reveal" style="margin-bottom:1.2rem;">
+            <div class="card">
+              <div class="sec-lbl">Clinical Parameters — Group A</div>
+              <div style="display:flex;flex-direction:column;gap:.8rem;">
+                <div class="g2" style="gap:.7rem;">
+                  <div class="form-group"><label class="form-label">Age</label><input class="form-input" type="number"
+                      id="h_age" value="50" min="20" max="100"></div>
+                  <div class="form-group"><label class="form-label">Sex</label><select class="form-select" id="h_sex">
+                      <option value="0">Female</option>
+                      <option value="1" selected>Male</option>
+                    </select></div>
+                </div>
+                <div class="form-group"><label class="form-label">Chest Pain Type</label><select class="form-select"
+                    id="h_cp">
+                    <option value="0">Typical Angina</option>
+                    <option value="1">Atypical Angina</option>
+                    <option value="2">Non-Anginal</option>
+                    <option value="3">Asymptomatic</option>
+                  </select></div>
+                <div class="g2" style="gap:.7rem;">
+                  <div class="form-group"><label class="form-label">Resting BP (mmHg)</label><input class="form-input"
+                      type="number" id="h_bp" value="120"></div>
+                  <div class="form-group"><label class="form-label">Cholesterol (mg/dL)</label><input class="form-input"
+                      type="number" id="h_chol" value="220"></div>
+                </div>
+                <div class="g2" style="gap:.7rem;">
+                  <div class="form-group"><label class="form-label">Fasting BS &gt; 120</label><select
+                      class="form-select" id="h_fbs">
+                      <option value="0">No</option>
+                      <option value="1">Yes</option>
+                    </select></div>
+                  <div class="form-group"><label class="form-label">Rest ECG</label><select class="form-select"
+                      id="h_ecg">
+                      <option value="0">Normal</option>
+                      <option value="1">ST Abnormality</option>
+                      <option value="2">LV Hypertrophy</option>
+                    </select></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="sec-lbl">Clinical Parameters — Group B</div>
+              <div style="display:flex;flex-direction:column;gap:.8rem;">
+                <div class="form-group"><label class="form-label">Max Heart Rate (BPM)</label><input class="form-input"
+                    type="number" id="h_hr" value="150"></div>
+                <div class="form-group"><label class="form-label">Exercise Angina</label><select class="form-select"
+                    id="h_exang">
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                  </select></div>
+                <div class="g2" style="gap:.7rem;">
+                  <div class="form-group"><label class="form-label">ST Depression</label><input class="form-input"
+                      type="number" id="h_old" value="1.0" step="0.1"></div>
+                  <div class="form-group"><label class="form-label">ST Slope</label><select class="form-select"
+                      id="h_slope">
+                      <option value="0">Upsloping</option>
+                      <option value="1">Flat</option>
+                      <option value="2">Downsloping</option>
+                    </select></div>
+                </div>
+                <div class="g2" style="gap:.7rem;">
+                  <div class="form-group"><label class="form-label">Major Vessels (0-4)</label><select
+                      class="form-select" id="h_ca">
+                      <option>0</option>
+                      <option>1</option>
+                      <option>2</option>
+                      <option>3</option>
+                      <option>4</option>
+                    </select></div>
+                  <div class="form-group"><label class="form-label">Thal</label><select class="form-select" id="h_thal">
+                      <option value="0">Unknown</option>
+                      <option value="1">Normal</option>
+                      <option value="2" selected>Fixed Defect</option>
+                      <option value="3">Reversible</option>
+                    </select></div>
+                </div>
+                <button class="btn btn-primary btn-full" id="heartBtn" onclick="analyzeHeart()">⚡ Analyze Heart
+                  Risk</button>
+              </div>
+            </div>
+          </div>
+          <div id="heartResults" style="display:none;">
+            <div class="g2 reveal" style="margin-bottom:1.2rem;">
+              <div class="card" style="text-align:center;padding:2rem;">
+                <div
+                  style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.8rem;">
+                  ❤️ Heart Disease Risk</div>
+                <div class="confidence-num" id="heartPct" style="color:var(--teal);">0%</div>
+                <div id="heartBadge" style="margin:.8rem 0;"></div>
+                <div id="heartAdvice" style="font-size:.82rem;color:var(--muted);line-height:1.6;"></div>
+              </div>
+              <div class="card">
+                <div class="sec-lbl">Risk Gauge</div><canvas id="heartGaugeChart" height="200"></canvas>
+              </div>
+            </div>
+            <div class="card reveal" style="margin-bottom:1.2rem;">
+              <div class="sec-lbl">🧠 SHAP — Explainable AI</div>
+              <div style="font-size:.82rem;color:var(--muted);margin-bottom:1rem;"><span style="color:var(--rose);">Red
+                  = increases risk</span> · <span style="color:var(--teal);">Teal = reduces risk</span></div>
+              <div id="heartShap"></div>
+            </div>
+            <div class="sim-box reveal" style="margin-bottom:1.2rem;">
+              <div class="sec-lbl">🔮 What-If Simulation</div>
+              <div class="g3">
+                <div class="form-group"><label class="form-label">Cholesterol: <span id="simCholVal"
+                      style="color:var(--teal);">220</span></label><input type="range" id="simChol" min="150" max="400"
+                    value="220" oninput="updateSim()"></div>
+                <div class="form-group"><label class="form-label">Blood Pressure: <span id="simBPVal"
+                      style="color:var(--teal);">120</span></label><input type="range" id="simBP" min="80" max="200"
+                    value="120" oninput="updateSim()"></div>
+                <div class="form-group"><label class="form-label">Max Heart Rate: <span id="simHRVal"
+                      style="color:var(--teal);">150</span></label><input type="range" id="simHR" min="60" max="220"
+                    value="150" oninput="updateSim()"></div>
+              </div>
+              <div class="sim-result"><span style="font-size:.7rem;color:var(--muted);">SIMULATED RISK: </span><span
+                  style="font-family:'Instrument Serif',serif;font-size:2rem;" id="simResult">—</span><span
+                  style="font-size:.9rem;margin-left:.5rem;" id="simDelta"></span></div>
+            </div>
+            <div class="card reveal">
+              <div class="sec-lbl">📊 Model Performance Comparison</div>
+              <canvas id="heartModelChart" height="180"></canvas>
+              <div class="card card-teal"
+                style="margin-top:1rem;padding:.9rem 1.2rem;display:flex;align-items:center;gap:.8rem;"><span
+                  style="font-size:1.3rem;">🏆</span>
+                <div>
+                  <div style="font-weight:700;font-size:.88rem;">Best Model: XGBoost</div>
+                  <div style="font-size:.75rem;color:var(--muted);">Accuracy: 89.3% · ROC-AUC: 0.958</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DIABETES -->
+        <div class="page" id="page-diabetes">
+          <div class="page-header">
+            <div class="page-eyebrow">AI Analysis</div>
+            <div class="page-title">🍬 Diabetes<br><em style="color:var(--amber);">Risk Assessment</em></div>
+            <div class="page-sub">XGBoost on PIMA Indians dataset with real SHAP explainability and What-If simulation.
+            </div>
+          </div>
+          <div class="g2 reveal" style="margin-bottom:1.2rem;">
+            <div class="card">
+              <div class="sec-lbl">Metabolic Parameters</div>
+              <div style="display:flex;flex-direction:column;gap:.8rem;">
+                <div class="g2" style="gap:.7rem;">
+                  <div class="form-group"><label class="form-label">Pregnancies</label><input class="form-input"
+                      type="number" id="d_preg" value="1" min="0"></div>
+                  <div class="form-group"><label class="form-label">Glucose (mg/dL)</label><input class="form-input"
+                      type="number" id="d_gluc" value="120"></div>
+                </div>
+                <div class="g2" style="gap:.7rem;">
+                  <div class="form-group"><label class="form-label">Blood Pressure</label><input class="form-input"
+                      type="number" id="d_bp" value="70"></div>
+                  <div class="form-group"><label class="form-label">Skin Thickness</label><input class="form-input"
+                      type="number" id="d_skin" value="20"></div>
+                </div>
+                <div class="g2" style="gap:.7rem;">
+                  <div class="form-group"><label class="form-label">Insulin Level</label><input class="form-input"
+                      type="number" id="d_ins" value="80"></div>
+                  <div class="form-group"><label class="form-label">BMI</label><input class="form-input" type="number"
+                      id="d_bmi" value="25.0" step="0.1"></div>
+                </div>
+                <div class="g2" style="gap:.7rem;">
+                  <div class="form-group"><label class="form-label">Diabetes Pedigree</label><input class="form-input"
+                      type="number" id="d_dpf" value="0.5" step="0.01"></div>
+                  <div class="form-group"><label class="form-label">Age</label><input class="form-input" type="number"
+                      id="d_age" value="30"></div>
+                </div>
+                <button class="btn btn-primary btn-full" id="diabBtn" onclick="analyzeDiabetes()">⚡ Analyze Diabetes
+                  Risk</button>
+              </div>
+            </div>
+            <div id="diabetesResults" style="display:flex;flex-direction:column;gap:1.2rem;">
+              <div class="card"
+                style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;">
+                <div style="opacity:.3;">
+                  <div style="font-size:3rem;margin-bottom:1rem;">🍬</div>
+                  <div style="font-size:.85rem;color:var(--muted);">Fill parameters &amp; click Analyze</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="diabExtras" style="display:none;" class="reveal">
+            <div class="card" style="margin-bottom:1.2rem;">
+              <div class="sec-lbl">🧠 SHAP — Diabetes Feature Impact</div>
+              <div id="diabShap"></div>
+            </div>
+            <div class="sim-box" style="margin-bottom:1.2rem;">
+              <div class="sec-lbl">🔮 What-If Simulation</div>
+              <div class="g3">
+                <div class="form-group"><label class="form-label">Glucose: <span id="simGlucVal"
+                      style="color:var(--teal);">120</span></label><input type="range" id="simGluc" min="50" max="300"
+                    value="120" oninput="updateDiabSim()"></div>
+                <div class="form-group"><label class="form-label">BMI: <span id="simBMIVal"
+                      style="color:var(--teal);">25</span></label><input type="range" id="simBMI" min="15" max="60"
+                    value="25" oninput="updateDiabSim()"></div>
+                <div class="form-group"><label class="form-label">Age: <span id="simAgeVal"
+                      style="color:var(--teal);">30</span></label><input type="range" id="simAge" min="10" max="90"
+                    value="30" oninput="updateDiabSim()"></div>
+              </div>
+              <div class="sim-result"><span style="font-size:.7rem;color:var(--muted);">SIMULATED RISK: </span><span
+                  style="font-family:'Instrument Serif',serif;font-size:2rem;" id="diabSimResult">—</span><span
+                  style="font-size:.9rem;margin-left:.5rem;" id="diabSimDelta"></span></div>
+            </div>
+            <div class="card">
+              <div class="sec-lbl">📊 Diabetes Model Comparison</div><canvas id="diabModelChart" height="180"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- DISEASE CHECKER -->
+        <div class="page" id="page-disease">
+          <div class="page-header">
+            <div class="page-eyebrow">Symptom Analysis</div>
+            <div class="page-title">🩺 Disease<br><em style="color:var(--teal);">Symptom Checker</em></div>
+            <div class="page-sub">Select 3+ symptoms from 132 markers. Real AI diagnoses 41 diseases with medicine &amp;
+              lifestyle plans.</div>
+          </div>
+          <div class="g2 reveal" style="margin-bottom:1.2rem;">
+            <div class="card">
+              <div class="sec-lbl">Select Symptoms</div>
+              <input class="form-input" id="symptomSearch" placeholder="🔍 Search symptoms..."
+                oninput="filterSymptoms()" style="margin-bottom:.6rem;">
+              <div class="symptom-cloud" id="symptomCloud">
+                <div class="loader">
+                  <div class="spinner"></div>Loading symptoms from API...
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.7rem;">
+                <div id="symptomCount" style="font-size:.78rem;color:var(--muted);">0 selected</div><button
+                  class="btn btn-outline" onclick="clearSymptoms()"
+                  style="font-size:.72rem;padding:.35rem .8rem;">Clear</button>
+              </div>
+              <div id="selectedTags" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem;min-height:28px;">
+              </div>
+              <button class="btn btn-primary btn-full" id="diseaseBtn" onclick="analyzeDisease()"
+                style="margin-top:1rem;">⚡ Diagnose &amp; Recommend</button>
+            </div>
+            <div id="diseaseResult" class="card" style="display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;opacity:.35;">
+                <div style="font-size:3rem;margin-bottom:.8rem;">🩺</div>
+                <div style="font-size:.85rem;color:var(--muted);">Select symptoms and click Diagnose</div>
+              </div>
+            </div>
+          </div>
+          <div id="diseaseInfo" style="display:none;" class="reveal">
+            <div class="card">
+              <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchTab(this,'dt1')">📖 Description</button>
+                <button class="tab-btn" onclick="switchTab(this,'dt2')">💊 Medicines</button>
+                <button class="tab-btn" onclick="switchTab(this,'dt3')">⚠️ Precautions</button>
+                <button class="tab-btn" onclick="switchTab(this,'dt4')">🥗 Diet</button>
+                <button class="tab-btn" onclick="switchTab(this,'dt5')">🏃 Workout</button>
+              </div>
+              <div id="dt1" class="tab-panel active"></div>
+              <div id="dt2" class="tab-panel"></div>
+              <div id="dt3" class="tab-panel"></div>
+              <div id="dt4" class="tab-panel"></div>
+              <div id="dt5" class="tab-panel"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SKIN -->
+        <div class="page" id="page-skin">
+          <div class="page-header">
+            <div class="page-eyebrow">CNN Vision AI</div>
+            <div class="page-title">🔬 Skin Disease<br><em style="color:var(--violet);">Detection</em></div>
+            <div class="page-sub">Deep Learning (EfficientNet/ResNet/MobileNet) detects 8 skin conditions from uploaded
+              images.</div>
+          </div>
+          <div class="g2 reveal" style="margin-bottom:1.2rem;">
+            <div class="card">
+              <div class="sec-lbl">Upload Skin Image</div>
+              <div class="upload-zone" id="uploadZone" onclick="document.getElementById('skinInput').click()"
+                ondragover="event.preventDefault();this.classList.add('drag')"
+                ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+                <input type="file" id="skinInput" accept="image/*" onchange="previewSkin(event)">
+                <div id="uploadPlaceholder">
+                  <div style="font-size:3rem;margin-bottom:.8rem;opacity:.45;">🖼️</div>
+                  <div style="font-size:.9rem;font-weight:600;color:var(--muted);margin-bottom:.3rem;">Drop skin image
+                    here</div>
+                  <div style="font-size:.75rem;color:var(--muted2);">JPG · PNG · WEBP</div>
+                </div>
+                <img id="skinPreview" class="upload-img-preview" style="display:none;">
+              </div>
+              <div id="imgInfo"
+                style="display:none;margin-top:.6rem;font-size:.75rem;color:var(--muted);background:var(--glass2);border:1px solid var(--border);border-radius:var(--r-sm);padding:.45rem .8rem;">
+              </div>
+              <button class="btn btn-primary btn-full" id="skinBtn" onclick="analyzeSkin()" style="margin-top:1rem;">🔬
+                Analyze Skin Image</button>
+              <div style="margin-top:1rem;">
+                <div class="sec-lbl">Tips</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;">
+                  <div class="info-row" style="font-size:.75rem;">☀️ Good lighting</div>
+                  <div class="info-row" style="font-size:.75rem;">🔍 Clear focus</div>
+                  <div class="info-row" style="font-size:.75rem;">📏 Full area visible</div>
+                  <div class="info-row" style="font-size:.75rem;">🎯 Skin centered</div>
+                </div>
+              </div>
+            </div>
+            <div id="skinResult" class="card" style="display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;opacity:.35;">
+                <div style="font-size:3rem;margin-bottom:.8rem;">🔬</div>
+                <div style="font-size:.85rem;color:var(--muted);">Upload an image to analyze</div>
+              </div>
+            </div>
+          </div>
+          <div class="card reveal">
+            <div class="sec-lbl">8 Detectable Conditions</div>
+            <div class="g3" id="skinGrid"></div>
+          </div>
+          <div
+            style="background:rgba(255,179,71,.06);border:1px solid rgba(255,179,71,.2);border-radius:var(--r);padding:.9rem 1.2rem;margin-top:1rem;font-size:.78rem;color:rgba(220,232,240,.65);line-height:1.6;">
+            ⚕️ <strong style="color:var(--amber);">Medical Disclaimer:</strong> AI tool for informational use only.
+            Consult a qualified dermatologist. ~80% accuracy.</div>
+        </div>
+
+        <!-- MONITOR -->
+        <div class="page" id="page-monitor">
+          <div class="page-header">
+            <div class="page-eyebrow">Unified Analysis</div>
+            <div class="page-title">📊 Risk<br><em style="color:var(--sky);">Monitor</em></div>
+            <div class="page-sub">Unified Health Risk Index combining Heart Disease and Diabetes probabilities.</div>
+          </div>
+          <div id="monitorEmpty" class="card" style="text-align:center;padding:4rem;margin-bottom:1.5rem;">
+            <div style="font-size:3rem;margin-bottom:1rem;opacity:.4;">📊</div>
+            <div style="font-size:.9rem;color:var(--muted);margin-bottom:1rem;">Run Heart and Diabetes analyses to see
+              your unified risk score.</div>
+            <div style="display:flex;gap:.8rem;justify-content:center;"><button class="btn btn-outline"
+                onclick="navigate('heart')">Analyze Heart →</button><button class="btn btn-outline"
+                onclick="navigate('diabetes')">Analyze Diabetes →</button></div>
+          </div>
+          <div id="monitorData" style="display:none;">
+            <div class="card card-sky" style="text-align:center;padding:2.5rem;margin-bottom:1.5rem;">
+              <div
+                style="font-size:.65rem;color:var(--muted2);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.5rem;">
+                Unified Health Risk Index</div>
+              <div id="uhriVal"
+                style="font-family:'Instrument Serif',serif;font-size:5rem;line-height:1;letter-spacing:-2px;">—</div>
+              <div id="uhriBadge" style="margin:.8rem 0;"></div>
+            </div>
+            <div class="g3" style="margin-bottom:1.5rem;">
+              <div class="card" style="text-align:center;">
+                <div
+                  style="font-size:.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">
+                  ❤️ Heart Risk</div>
+                <div id="monHeart" style="font-family:'Instrument Serif',serif;font-size:2.5rem;color:var(--rose);">—
+                </div>
+                <div class="prog-wrap" style="margin-top:.6rem;">
+                  <div class="prog-bar" id="monHeartBar" style="background:var(--rose);width:0%;"></div>
+                </div>
+              </div>
+              <div class="card" style="text-align:center;">
+                <div
+                  style="font-size:.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">
+                  🍬 Diabetes Risk</div>
+                <div id="monDiab" style="font-family:'Instrument Serif',serif;font-size:2.5rem;color:var(--amber);">—
+                </div>
+                <div class="prog-wrap" style="margin-top:.6rem;">
+                  <div class="prog-bar" id="monDiabBar" style="background:var(--amber);width:0%;"></div>
+                </div>
+              </div>
+              <div class="card" style="text-align:center;">
+                <div
+                  style="font-size:.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">
+                  🧬 UHRI Score</div>
+                <div id="monUhri2" style="font-family:'Instrument Serif',serif;font-size:2.5rem;color:var(--sky);">—
+                </div>
+                <div class="prog-wrap" style="margin-top:.6rem;">
+                  <div class="prog-bar" id="monUhriBar" style="background:var(--sky);width:0%;"></div>
+                </div>
+              </div>
+            </div>
+            <div class="g2">
+              <div class="card">
+                <div class="sec-lbl">Health Radar</div><canvas id="radarChart" height="240"></canvas>
+              </div>
+              <div class="card">
+                <div class="sec-lbl">Analysis History</div>
+                <div id="historyList"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REPORTS -->
+        <div class="page" id="page-reports">
+          <div class="page-header">
+            <div class="page-eyebrow">Documentation</div>
+            <div class="page-title">📄 Medical<br><em style="color:var(--muted);">Report Generator</em></div>
+            <div class="page-sub">Generate a comprehensive PDF health report from your AI analysis results.</div>
+          </div>
+          <div class="g2 reveal">
+            <div class="card">
+              <div class="sec-lbl">Report Configuration</div>
+              <div style="display:flex;flex-direction:column;gap:.9rem;">
+                <div class="form-group"><label class="form-label">Patient Full Name</label><input class="form-input"
+                    id="reportName" placeholder="Enter patient name"></div>
+                <div class="form-group"><label class="form-label">Report Date</label><input class="form-input"
+                    id="reportDate" type="date"></div>
+                <div class="form-group"><label class="form-label">Include Sections</label>
+                  <div style="display:flex;flex-direction:column;gap:.4rem;margin-top:.3rem;">
+                    <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;"><input
+                        type="checkbox" id="incHeart" checked> ❤️ Heart Disease Analysis</label>
+                    <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;"><input
+                        type="checkbox" id="incDiab" checked> 🍬 Diabetes Risk Analysis</label>
+                    <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;"><input
+                        type="checkbox" id="incDisease" checked> 🩺 Disease Diagnosis</label>
+                  </div>
+                </div>
+                <button class="btn btn-primary btn-full" id="reportBtn" onclick="generateReport()">📥 Download PDF
+                  Report</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="sec-lbl">Report Preview</div>
+              <div
+                style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:var(--r-sm);padding:1.5rem;font-family:'Fira Code',monospace;font-size:.74rem;line-height:1.9;color:var(--muted);">
+                <div style="color:var(--teal);font-size:.9rem;margin-bottom:.5rem;">🧬 HEALTHFUSION AI REPORT</div>
+                <div>━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+                <div id="prevHeart">❤️ Heart Risk : [Run Analysis]</div>
+                <div id="prevDiab">🍬 Diabetes Risk : [Run Analysis]</div>
+                <div id="prevUhri">🧬 UHRI Score : [Run Analysis]</div>
+                <div id="prevDisease">🩺 Diagnosis : [Run Checker]</div>
+                <div>━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+                <div style="font-size:.62rem;color:var(--muted2);margin-top:.4rem;">⚠ Informational purposes only</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABOUT -->
+        <div class="page" id="page-about">
+          <div class="page-header">
+            <div class="page-eyebrow">Platform Info</div>
+            <div class="page-title">🧬 About<br><em style="color:var(--teal);">HealthFusion AI</em></div>
+            <div class="page-sub">Advanced AI-powered healthcare decision support with clinical-grade ML models
+            </div>
+          </div>
+          <div class="g3 reveal" style="margin-bottom:1.5rem;">
+            <div class="feat-card card-rose">
+              <div class="feat-icon">❤️</div>
+              <div class="feat-title">Heart Disease Module</div>
+              <div class="feat-desc">Random Forest (Tuned) on UCI Cleveland Dataset. SHAP explainability + What-If
+                simulation.</div><span class="badge badge-safe" style="margin-top:.8rem;display:inline-flex;">85%+
+                Accuracy</span>
+            </div>
+            <div class="feat-card card-amber">
+              <div class="feat-icon">🍬</div>
+              <div class="feat-title">Diabetes Module</div>
+              <div class="feat-desc">XGBoost (Tuned) on PIMA Indians Database. Insulin resistance & metabolic disorder
+                detection.</div><span class="badge badge-safe" style="margin-top:.8rem;display:inline-flex;">80%+
+                Accuracy</span>
+            </div>
+            <div class="feat-card card-teal">
+              <div class="feat-icon">🩺</div>
+              <div class="feat-title">Disease Checker</div>
+              <div class="feat-desc">Random Forest on Kaggle Dataset. 132 symptoms → 41 diseases. Medicine + diet +
+                workout plans.</div><span class="badge badge-safe" style="margin-top:.8rem;display:inline-flex;">99.7%
+                Accuracy</span>
+            </div>
+            <div class="feat-card card-violet">
+              <div class="feat-icon">🔬</div>
+              <div class="feat-title">Skin Detection</div>
+              <div class="feat-desc">CNN Deep Learning (EfficientNet/ResNet/MobileNet). 8 skin conditions from uploaded
+                images.</div><span class="badge badge-violet" style="margin-top:.8rem;display:inline-flex;">~80%
+                Accuracy</span>
+            </div>
+            <div class="feat-card card-sky">
+              <div class="feat-icon">⚡</div>
+              <div class="feat-title">FastAPI Backend</div>
+              <div class="feat-desc">REST API connecting this premium HTML frontend to real Python ML models.
+                CORS-enabled.</div><span class="badge badge-info"
+                style="margin-top:.8rem;display:inline-flex;">Production-Ready</span>
+            </div>
+            <div class="feat-card">
+              <div class="feat-icon">🧠</div>
+              <div class="feat-title">Explainable AI</div>
+              <div class="feat-desc">Real SHAP values show which features drive each prediction — fully transparent AI
+                reasoning.</div><span class="badge badge-warn" style="margin-top:.8rem;display:inline-flex;">SHAP
+                XAI</span>
+            </div>
+          </div>
+          <div class="card" style="background:rgba(255,179,71,.05);border-color:rgba(255,179,71,.2);">
+            <div class="sec-lbl" style="color:var(--amber);">Medical Disclaimer</div>
+            <div style="font-size:.88rem;color:rgba(220,232,240,.7);line-height:1.8;">HealthFusion AI is for Now
+              educational
+              and informational purposes only</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- HYBRID AI CHATBOT UI -->
+  <button class="chatbot-btn" id="chatbotBtn" onclick="toggleChat()"
+    style="display: flex; align-items: center; justify-content: center; overflow: visible;">
+    <lottie-player src="/static/chatbot.json" background="transparent" speed="1" style="width: 100%; height: 100%;" loop
+      autoplay></lottie-player>
+  </button>
+
+  <div class="chatbot-panel" id="chatbotPanel">
+    <div class="chatbot-header">
+      <div style="display:flex;align-items:center;gap:.7rem;">
+        <div style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+          <lottie-player src="/static/chatbot.json" background="transparent" speed="1"
+            style="width: 36px; height: 36px;" loop autoplay></lottie-player>
+        </div>
+        <div>
+          <div style="font-family:'Instrument Serif',serif;font-size:1.3rem;line-height:1;margin-bottom:2px;">Medical
+            Assistant</div>
+          <div style="font-size:.7rem;color:var(--teal);letter-spacing:1px;text-transform:uppercase;">Hybrid AI Online
+          </div>
+        </div>
+      </div>
+      <button onclick="toggleChat()"
+        style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">×</button>
+    </div>
+    <div class="chatbot-messages" id="chatbotMessages">
+      <div class="bot-msg">Hello! I am HealthFusion's Medical AI. I can explain your predictions, risk levels, and SHAP
+        features. How can I help you regarding your recent analysis?</div>
+      <div class="disclaimer-banner">
+        <strong>Disclaimer:</strong> This AI provides explanations based on the ML models. It does <u>not</u> provide
+        medical diagnoses or prescribe medications. Always consult a doctor.
+      </div>
+    </div>
+    <div class="chatbot-input">
+      <input type="text" id="chatInput" placeholder="Ask about your risk..." onkeypress="handleChatKey(event)">
+      <button onclick="sendChatMessage()" id="chatSendBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────────
+    //  CONFIG
+    // ─────────────────────────────────────────────
+    const API = window.location.origin;
+    const state = {
+      username: '',
+      results: { heart: null, diabetes: null, disease: null },
+      history: [],
+      apiOnline: false
+    };
+
+    // ─────────────────────────────────────────────
+    //  CURSOR
+    // ─────────────────────────────────────────────
+    const cur = document.getElementById('cur');
+    const curR = document.getElementById('cur-r');
+    document.addEventListener('mousemove', e => {
+      cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
+      setTimeout(() => { curR.style.left = e.clientX + 'px'; curR.style.top = e.clientY + 'px'; }, 80);
+    });
+    document.querySelectorAll('button,.nav-item,.card,.feat-card,.symptom-pill').forEach(el => {
+      el.addEventListener('mouseenter', () => { cur.style.width = '18px'; cur.style.height = '18px'; curR.style.width = '50px'; curR.style.height = '50px'; });
+      el.addEventListener('mouseleave', () => { cur.style.width = '10px'; cur.style.height = '10px'; curR.style.width = '36px'; curR.style.height = '36px'; });
+    });
+
+    // ─────────────────────────────────────────────
+    //  THREE.JS BACKGROUND
+    // ─────────────────────────────────────────────
+    function initBg(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      const count = 600, pos = new Float32Array(count * 3), col = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        const t = (i / count) * Math.PI * 12;
+        pos[i * 3] = Math.cos(t) * 3 + (Math.random() - .5) * 1.5;
+        pos[i * 3 + 1] = (i / count) * 28 - 14;
+        pos[i * 3 + 2] = Math.sin(t) * 3 + (Math.random() - .5) * 1.5;
+        const isTeal = Math.random() > .5;
+        col[i * 3] = isTeal ? 0 : .2; col[i * 3 + 1] = isTeal ? .9 : .5; col[i * 3 + 2] = isTeal ? .76 : 1;
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+      const helix = new THREE.Points(geo, new THREE.PointsMaterial({ size: .08, vertexColors: true, transparent: true, opacity: .8 }));
+      helix.position.x = 7; scene.add(helix);
+      const p2 = new Float32Array(200 * 3);
+      for (let i = 0; i < 200; i++) { p2[i * 3] = (Math.random() - .5) * 30; p2[i * 3 + 1] = (Math.random() - .5) * 30; p2[i * 3 + 2] = (Math.random() - .5) * 10 - 5; }
+      const geo2 = new THREE.BufferGeometry(); geo2.setAttribute('position', new THREE.BufferAttribute(p2, 3));
+      scene.add(new THREE.Points(geo2, new THREE.PointsMaterial({ color: 0x00e5c3, size: .04, transparent: true, opacity: .3 })));
+      camera.position.z = 14;
+      let f = 0;
+      (function loop() { requestAnimationFrame(loop); f++; helix.rotation.y = f * .004; helix.position.y = Math.sin(f * .006) * .5; renderer.render(scene, camera); })();
+      window.addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+    }
+    initBg('bg'); initBg('auth-bg');
+
+    // ─────────────────────────────────────────────
+    //  CLOCK + API CHECK
+    // ─────────────────────────────────────────────
+    function updateClock() {
+      const t = new Date().toTimeString().slice(0, 8);
+      const el = document.getElementById('topbarTime'); if (el) el.textContent = t;
+    }
+    setInterval(updateClock, 1000); updateClock();
+
+    async function checkAPI() {
+      try {
+        const res = await fetch(`${API}/api/health`, {
+          signal: AbortSignal.timeout(3000),
+          headers: { 'Authorization': `Bearer ${sessionStorage.getItem('hf_token')}` }
+        });
+        const data = await res.json();
+        state.apiOnline = true;
+        document.getElementById('apiDot').classList.remove('offline');
+        document.getElementById('apiStatusText').textContent = 'Online';
+        document.getElementById('apiStatusBadge').textContent = '● API Online';
+        document.getElementById('apiStatusBadge').className = 'api-status ok';
+
+        // Update dashboard models count
+        const activeModels = Object.values(data.models).filter(Boolean).length;
+        document.getElementById('dashModels').textContent = activeModels + '/4';
+        const labels = [];
+        if (data.models.heart) labels.push('Heart');
+        if (data.models.diabetes) labels.push('Diabetes');
+        if (data.models.disease) labels.push('Disease');
+        if (data.models.skin) labels.push('Skin');
+        document.getElementById('dashModelsLabel').textContent = labels.length ? '↑ ' + labels.join(' · ') : 'No models found';
+      } catch (e) {
+        state.apiOnline = false;
+        document.getElementById('apiDot').classList.add('offline');
+        document.getElementById('apiStatusText').textContent = 'Offline';
+        document.getElementById('apiStatusBadge').textContent = '● API Offline';
+        document.getElementById('apiStatusBadge').className = 'api-status err';
+        document.getElementById('dashModels').textContent = '—';
+        document.getElementById('dashModelsLabel').textContent = 'Start: uvicorn api:app';
+      }
+    }
+    setInterval(checkAPI, 10000);
+
+    // ─────────────────────────────────────────────
+    //  TOAST
+    // ─────────────────────────────────────────────
+    function toast(msg, type = 'success', dur = 3000) {
+      const tc = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = (type === 'success' ? '✓ ' : type === 'error' ? '✕ ' : 'ℹ ') + msg;
+      tc.appendChild(t);
+      setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(20px)'; t.style.transition = 'all .3s'; setTimeout(() => t.remove(), 300); }, dur);
+    }
+
+    // ─────────────────────────────────────────────
+    //  HELPERS
+    // ─────────────────────────────────────────────
+    function getRiskInfo(prob) {
+      if (prob < .30) return { label: 'SAFE', color: 'var(--teal)', badgeClass: 'badge-safe' };
+      if (prob < .60) return { label: 'MONITOR', color: 'var(--amber)', badgeClass: 'badge-warn' };
+      if (prob < .80) return { label: 'HIGH RISK', color: '#ff7043', badgeClass: 'badge-high' };
+      return { label: 'CRITICAL', color: 'var(--rose)', badgeClass: 'badge-crit' };
+    }
+
+    function setLoading(btnId, loading, label = '') {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.disabled = loading;
+      btn.innerHTML = loading ? '<div class="spinner" style="width:14px;height:14px;border-width:2px;"></div> Analyzing...' : label;
+    }
+
+    function renderShap(containerId, shapData) {
+      const container = document.getElementById(containerId);
+      if (!shapData || !shapData.length) { container.innerHTML = '<div style="font-size:.82rem;color:var(--muted);">SHAP not available — install: pip install shap</div>'; return; }
+      const maxAbs = Math.max(...shapData.map(d => Math.abs(d.value)));
+      container.innerHTML = shapData.slice(0, 10).map(d => {
+        const pct = (Math.abs(d.value) / maxAbs * 45).toFixed(1);
+        const pos = d.value > 0;
+        return `<div class="shap-row">
+      <div class="shap-name">${d.feature}</div>
+      <div class="shap-track">
+        <div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:rgba(255,255,255,.12);"></div>
+        <div style="position:absolute;${pos ? 'left:50%' : 'left:calc(50% - ' + pct + '%)'};top:0;height:100%;width:${pct}%;background:${pos ? 'var(--rose)' : 'var(--teal)'};border-radius:2px;"></div>
+      </div>
+      <div class="shap-val" style="color:${pos ? 'var(--rose)' : 'var(--teal)'};">${pos ? '+' : ''}${d.value.toFixed(3)}</div>
+    </div>`;
+      }).join('');
+    }
+
+    function addHistory(type, prob, label) {
+      state.history.push({ type, prob: prob ? (prob * 100).toFixed(1) + '%' : null, label, time: new Date().toLocaleTimeString() });
+    }
+
+    function switchTab(btn, panelId) {
+      btn.closest('.card').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.closest('.card').querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(panelId).classList.add('active');
+    }
+
+    // ─────────────────────────────────────────────
+    //  AUTH
+    // ─────────────────────────────────────────────
+    function switchAuthTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach((b, i) => b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register')));
+      document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+      document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+    }
+    async function doLogin() {
+      const u = document.getElementById('loginUser').value.trim();
+      const p = document.getElementById('loginPass').value.trim();
+      if (!u || !p) { toast('Please enter username and password', 'error'); return; }
+
+      try {
+        const res = await fetch(`${API}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Login failed');
+
+        sessionStorage.setItem('hf_token', data.token);
+        state.username = data.username;
+        finishLogin(data.username);
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    async function doRegister() {
+      const u = document.getElementById('regUser').value.trim();
+      const e = document.getElementById('regEmail').value.trim();
+      const p = document.getElementById('regPass').value.trim();
+
+      if (!u || !e || !p) { toast('Please fill all fields', 'error'); return; }
+
+      try {
+        const res = await fetch(`${API}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, email: e, password: p })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Registration failed');
+
+        sessionStorage.setItem('hf_token', data.token);
+        state.username = data.username;
+        finishLogin(data.username);
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    function finishLogin(u) {
+      document.getElementById('authPage').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'flex';
+      document.getElementById('userDisplayName').textContent = u;
+      document.getElementById('userAvatar').textContent = u[0].toUpperCase();
+      document.getElementById('welcomeName').textContent = u;
+      document.getElementById('reportName').value = u;
+      document.getElementById('reportDate').value = new Date().toISOString().slice(0, 10);
+      checkAPI();
+      initDashboard();
+      initSkinGrid();
+      loadSymptoms();
+      loadHistory();
+      setTimeout(() => document.querySelectorAll('.reveal').forEach(el => el.classList.add('in')), 100);
+      toast(`Welcome back, ${u}! 🧬`);
+    }
+
+    async function doLogout() {
+      try {
+        await fetch(`${API}/api/auth/logout`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${sessionStorage.getItem('hf_token')}` }
+        });
+      } catch (e) { }
+      sessionStorage.removeItem('hf_token');
+      document.getElementById('mainApp').style.display = 'none';
+      document.getElementById('authPage').style.display = 'flex';
+    }
+
+    async function loadHistory() {
+      try {
+        const res = await fetch(`${API}/api/history`, {
+          headers: { 'Authorization': `Bearer ${sessionStorage.getItem('hf_token')}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          state.history = data.history.map(item => ({
+            type: item.pred_type,
+            prob: item.pred_type === 'disease' ? null : (item[item.pred_type + '_prob'] || item.uhri),
+            label: item.disease_name || item.risk_level,
+            time: new Date(item.timestamp).toLocaleTimeString()
+          })).reverse();
+        }
+      } catch (e) { }
+    }
+
+    // ─────────────────────────────────────────────
+    //  NAVIGATION
+    // ─────────────────────────────────────────────
+    const pageNames = { dashboard: 'Dashboard', heart: '❤️ Heart Disease', diabetes: '🍬 Diabetes', disease: '🩺 Disease Checker', skin: '🔬 Skin Detection', monitor: '📊 Risk Monitor', reports: '📄 Reports', about: 'ℹ️ About' };
+    function navigate(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('page-' + page).classList.add('active');
+      document.querySelector(`[data-page="${page}"]`).classList.add('active');
+      document.getElementById('topbarTitle').textContent = pageNames[page];
+      if (page === 'monitor') updateMonitor();
+      if (page === 'reports') updateReportPreview();
+      setTimeout(() => document.querySelectorAll('.reveal').forEach(el => el.classList.add('in')), 50);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ─────────────────────────────────────────────
+    //  DASHBOARD CHART
+    // ─────────────────────────────────────────────
+    function initDashboard() {
+      const ctx = document.getElementById('dashTrendChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [
+            { label: 'Heart Risk %', data: [32, 28, 35, 30, 27, 31, 29], borderColor: '#ff4e6a', backgroundColor: 'rgba(255,78,106,.08)', fill: true, tension: .4, pointRadius: 3, borderWidth: 2 },
+            { label: 'Diabetes Risk %', data: [45, 42, 48, 44, 40, 43, 41], borderColor: '#ffb347', backgroundColor: 'rgba(255,179,71,.08)', fill: true, tension: .4, pointRadius: 3, borderWidth: 2 },
+          ]
+        },
+        options: { plugins: { legend: { labels: { color: 'rgba(220,232,240,.6)', font: { size: 11 } } } }, scales: { x: { ticks: { color: 'rgba(220,232,240,.4)' }, grid: { color: 'rgba(255,255,255,.04)' } }, y: { ticks: { color: 'rgba(220,232,240,.4)', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,.04)' } } }, animation: { duration: 1500 } }
+      });
+    }
+
+    // ─────────────────────────────────────────────
+    //  HEART ANALYSIS
+    // ─────────────────────────────────────────────
+    let heartProb = null;
+    async function analyzeHeart() {
+      setLoading('heartBtn', true);
+      try {
+        const payload = {
+          age: +document.getElementById('h_age').value,
+          sex: +document.getElementById('h_sex').value,
+          cp: +document.getElementById('h_cp').value,
+          trestbps: +document.getElementById('h_bp').value,
+          chol: +document.getElementById('h_chol').value,
+          fbs: +document.getElementById('h_fbs').value,
+          restecg: +document.getElementById('h_ecg').value,
+          thalach: +document.getElementById('h_hr').value,
+          exang: +document.getElementById('h_exang').value,
+          oldpeak: +document.getElementById('h_old').value,
+          slope: +document.getElementById('h_slope').value,
+          ca: +document.getElementById('h_ca').value,
+          thal: +document.getElementById('h_thal').value,
+        };
+
+        const res = await fetch(`${API}/api/heart`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('hf_token')}` }, body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error((await res.json()).detail || 'Heart analysis failed');
+        const data = await res.json();
+
+        heartProb = data.probability;
+        state.results.heart = data.probability;
+        const { label, color, badgeClass } = getRiskInfo(data.probability);
+
+        document.getElementById('heartPct').textContent = data.percentage + '%';
+        document.getElementById('heartPct').style.color = color;
+        document.getElementById('heartBadge').innerHTML = `<span class="badge ${badgeClass}">${label}</span>`;
+        document.getElementById('heartAdvice').textContent = data.advice;
+        document.getElementById('heartResults').style.display = 'block';
+
+        // Gauge
+        const gc = document.getElementById('heartGaugeChart').getContext('2d');
+        if (window._hGauge) window._hGauge.destroy();
+        window._hGauge = new Chart(gc, { type: 'doughnut', data: { datasets: [{ data: [data.percentage, 100 - data.percentage], backgroundColor: [color, 'rgba(255,255,255,.06)'], borderWidth: 0, circumference: 180, rotation: 270 }] }, options: { cutout: '78%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, animation: { duration: 1800 } } });
+
+        renderShap('heartShap', data.shap);
+
+        // Model comparison
+        if (!window._hModel) {
+          window._hModel = new Chart(document.getElementById('heartModelChart').getContext('2d'), { type: 'bar', data: { labels: ['Logistic Reg.', 'Random Forest', 'Gradient Boost', 'SVM', 'XGBoost'], datasets: [{ label: 'Accuracy', data: [83.6, 88.5, 86.9, 85.2, 89.3], backgroundColor: 'rgba(0,229,195,.7)', borderRadius: 4 }, { label: 'ROC-AUC', data: [91.2, 95.1, 93.8, 92.1, 95.8], backgroundColor: 'rgba(56,189,248,.7)', borderRadius: 4 }] }, options: { plugins: { legend: { labels: { color: 'rgba(220,232,240,.6)', font: { size: 10 } } } }, scales: { x: { ticks: { color: 'rgba(220,232,240,.5)' }, grid: { display: false } }, y: { ticks: { color: 'rgba(220,232,240,.4)' }, grid: { color: 'rgba(255,255,255,.04)' }, min: 75, max: 100 } }, animation: { duration: 1500 } } });
+        }
+
+        document.getElementById('simChol').value = payload.chol;
+        document.getElementById('simBP').value = payload.trestbps;
+        document.getElementById('simHR').value = payload.thalach;
+        updateSim();
+        addHistory('heart', data.probability, label);
+
+        if (data.probability > .85) {
+          document.getElementById('heartResults').insertAdjacentHTML('beforebegin', `<div class="alert-banner" style="margin-bottom:1rem;"><div class="alert-icon">🚨</div><div><div class="alert-title">Critical Cardiac Risk</div><div class="alert-body">Your heart disease risk is critically high. Seek immediate medical consultation.</div></div></div>`);
+        }
+
+        // Update Hybrid AI context
+        currentPredictionContext = `Prediction Type: Heart Disease Risk\nRisk Probability: ${data.percentage}%\nRisk Level: ${label}\nAdvice: ${data.advice}\nSHAP Features (if available): ${JSON.stringify(data.shap.slice(0, 5))}`;
+
+        setTimeout(() => document.querySelectorAll('.reveal').forEach(el => el.classList.add('in')), 100);
+        toast('Heart analysis complete ❤️');
+      } catch (e) {
+        toast(e.message, 'error');
+        if (!state.apiOnline) toast('Is the FastAPI server running? Run: uvicorn api:app --reload', 'error', 6000);
+      }
+      setLoading('heartBtn', false, '⚡ Analyze Heart Risk');
+    }
+
+    function updateSim() {
+      const c = +document.getElementById('simChol').value, b = +document.getElementById('simBP').value, h = +document.getElementById('simHR').value;
+      document.getElementById('simCholVal').textContent = c;
+      document.getElementById('simBPVal').textContent = b;
+      document.getElementById('simHRVal').textContent = h;
+      if (heartProb === null) return;
+      let delta = 0; if (c > 240) delta += .03; if (b > 140) delta += .025; if (h < 100) delta += .02;
+      const sP = Math.min(Math.max(heartProb + delta - .01, .02), .98);
+      const diff = (sP - heartProb) * 100;
+      document.getElementById('simResult').textContent = (sP * 100).toFixed(1) + '%';
+      document.getElementById('simResult').style.color = sP > heartProb ? 'var(--rose)' : 'var(--teal)';
+      document.getElementById('simDelta').textContent = (diff > 0 ? '▲ +' : '▼ ') + Math.abs(diff).toFixed(1) + '%';
+      document.getElementById('simDelta').style.color = diff > 0 ? 'var(--rose)' : 'var(--teal)';
+    }
+
+    // ─────────────────────────────────────────────
+    //  DIABETES ANALYSIS
+    // ─────────────────────────────────────────────
+    let diabProb = null;
+    async function analyzeDiabetes() {
+      setLoading('diabBtn', true);
+      try {
+        const payload = {
+          pregnancies: +document.getElementById('d_preg').value,
+          glucose: +document.getElementById('d_gluc').value,
+          blood_pressure: +document.getElementById('d_bp').value,
+          skin_thickness: +document.getElementById('d_skin').value,
+          insulin: +document.getElementById('d_ins').value,
+          bmi: +document.getElementById('d_bmi').value,
+          diabetes_pedigree: +document.getElementById('d_dpf').value,
+          age: +document.getElementById('d_age').value,
+        };
+
+        const res = await fetch(`${API}/api/diabetes`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('hf_token')}` }, body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error((await res.json()).detail || 'Diabetes analysis failed');
+        const data = await res.json();
+
+        diabProb = data.probability;
+        state.results.diabetes = data.probability;
+        const { label, color, badgeClass } = getRiskInfo(data.probability);
+
+        document.getElementById('diabetesResults').innerHTML = `
+      <div class="card card-amber" style="text-align:center;padding:2rem;flex:1;">
+        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.8rem;">🍬 Diabetes Risk</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:3.5rem;color:${color};letter-spacing:-2px;">${data.percentage}%</div>
+        <div style="margin:.8rem 0;"><span class="badge ${badgeClass}">${label}</span></div>
+        <div style="font-size:.82rem;color:var(--muted);line-height:1.6;max-width:240px;margin:0 auto;">${data.advice}</div>
+      </div>
+      <div class="card"><div class="sec-lbl">Glucose vs BMI Map</div><canvas id="diabScatter" height="140"></canvas></div>`;
+
+        setTimeout(() => {
+          new Chart(document.getElementById('diabScatter').getContext('2d'), { type: 'scatter', data: { datasets: [{ label: 'Risk Zone', data: [{ x: 100, y: 18 }, { x: 100, y: 40 }, { x: 200, y: 40 }, { x: 200, y: 18 }], showLine: true, fill: true, backgroundColor: 'rgba(255,78,106,.06)', borderColor: 'rgba(255,78,106,.2)', borderWidth: 1, pointRadius: 0 }, { label: 'Your Position', data: [{ x: payload.glucose, y: payload.bmi }], backgroundColor: 'var(--teal)', pointRadius: 10 }] }, options: { plugins: { legend: { labels: { color: 'rgba(220,232,240,.5)', font: { size: 10 } } } }, scales: { x: { title: { display: true, text: 'Glucose', color: 'rgba(220,232,240,.5)' }, ticks: { color: 'rgba(220,232,240,.4)' }, grid: { color: 'rgba(255,255,255,.04)' } }, y: { title: { display: true, text: 'BMI', color: 'rgba(220,232,240,.5)' }, ticks: { color: 'rgba(220,232,240,.4)' }, grid: { color: 'rgba(255,255,255,.04)' } } }, animation: { duration: 1500 } } });
+        }, 50);
+
+        document.getElementById('diabExtras').style.display = 'block';
+        renderShap('diabShap', data.shap);
+
+        if (!window._dModel) {
+          window._dModel = new Chart(document.getElementById('diabModelChart').getContext('2d'), { type: 'bar', data: { labels: ['Logistic Reg.', 'Random Forest', 'Gradient Boost', 'SVM', 'XGBoost'], datasets: [{ label: 'Accuracy', data: [77.1, 81.2, 80.5, 78.9, 82.4], backgroundColor: 'rgba(255,179,71,.7)', borderRadius: 4 }, { label: 'ROC-AUC', data: [84.1, 87.9, 87.2, 85.8, 89.1], backgroundColor: 'rgba(167,139,250,.7)', borderRadius: 4 }] }, options: { plugins: { legend: { labels: { color: 'rgba(220,232,240,.6)', font: { size: 10 } } } }, scales: { x: { ticks: { color: 'rgba(220,232,240,.5)' }, grid: { display: false } }, y: { ticks: { color: 'rgba(220,232,240,.4)' }, grid: { color: 'rgba(255,255,255,.04)' }, min: 70, max: 100 } }, animation: { duration: 1500 } } });
+        }
+
+        document.getElementById('simGluc').value = payload.glucose;
+        document.getElementById('simBMI').value = payload.bmi;
+        document.getElementById('simAge').value = payload.age;
+        updateDiabSim();
+        addHistory('diabetes', data.probability, label);
+
+        // Update Hybrid AI context
+        currentPredictionContext = `Prediction Type: Diabetes Risk\nRisk Probability: ${data.percentage}%\nRisk Level: ${label}\nAdvice: ${data.advice}\nSHAP Features (if available): ${JSON.stringify(data.shap.slice(0, 5))}`;
+
+        setTimeout(() => document.querySelectorAll('.reveal').forEach(el => el.classList.add('in')), 100);
+        toast('Diabetes analysis complete 🍬');
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+      setLoading('diabBtn', false, '⚡ Analyze Diabetes Risk');
+    }
+
+    function updateDiabSim() {
+      const g = +document.getElementById('simGluc').value, b = +document.getElementById('simBMI').value, a = +document.getElementById('simAge').value;
+      document.getElementById('simGlucVal').textContent = g;
+      document.getElementById('simBMIVal').textContent = b;
+      document.getElementById('simAgeVal').textContent = a;
+      if (diabProb === null) return;
+      let d = 0; if (g > 140) d += .04; if (b > 30) d += .03; if (a > 45) d += .025;
+      const sP = Math.min(Math.max(diabProb + d - .01, .02), .98);
+      const diff = (sP - diabProb) * 100;
+      document.getElementById('diabSimResult').textContent = (sP * 100).toFixed(1) + '%';
+      document.getElementById('diabSimResult').style.color = sP > diabProb ? 'var(--rose)' : 'var(--teal)';
+      document.getElementById('diabSimDelta').textContent = (diff > 0 ? '▲ +' : '▼ ') + Math.abs(diff).toFixed(1) + '%';
+      document.getElementById('diabSimDelta').style.color = diff > 0 ? 'var(--rose)' : 'var(--teal)';
+    }
+
+    // ─────────────────────────────────────────────
+    //  DISEASE CHECKER
+    // ─────────────────────────────────────────────
+    let selectedSymptoms = [];
+
+    async function loadSymptoms() {
+      try {
+        const res = await fetch(`${API}/api/symptoms`, {
+          headers: { 'Authorization': `Bearer ${sessionStorage.getItem('hf_token')}` }
+        });
+        const data = await res.json();
+        const cloud = document.getElementById('symptomCloud');
+        if (data.symptoms && data.symptoms.length) {
+          cloud.innerHTML = data.symptoms.map(s => `<div class="symptom-pill" onclick="toggleSymptom(this,'${s}')">${s}</div>`).join('');
+        } else {
+          cloud.innerHTML = '<div style="font-size:.78rem;color:var(--muted);">No symptoms loaded — check disease model.</div>';
+        }
+      } catch (e) {
+        document.getElementById('symptomCloud').innerHTML = '<div style="font-size:.78rem;color:var(--rose);">API offline — start server first.</div>';
+      }
+    }
+
+    function filterSymptoms() {
+      const q = document.getElementById('symptomSearch').value.toLowerCase();
+      document.querySelectorAll('#symptomCloud .symptom-pill').forEach(p => {
+        p.style.display = p.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+
+    function toggleSymptom(el, sym) {
+      const idx = selectedSymptoms.indexOf(sym);
+      if (idx === -1) { selectedSymptoms.push(sym); el.classList.add('selected'); }
+      else { selectedSymptoms.splice(idx, 1); el.classList.remove('selected'); }
+      updateSymptomUI();
+    }
+
+    function updateSymptomUI() {
+      document.getElementById('symptomCount').textContent = selectedSymptoms.length + ' selected' + (selectedSymptoms.length < 3 ? ' (need 3+)' : ' ✅');
+      document.getElementById('selectedTags').innerHTML = selectedSymptoms.map(s => `<span class="badge badge-info" style="cursor:pointer;" onclick="removeSymptom('${s}')">${s} ×</span>`).join('');
+    }
+
+    function removeSymptom(sym) {
+      document.querySelectorAll('.symptom-pill').forEach(p => { if (p.textContent === sym) p.classList.remove('selected'); });
+      selectedSymptoms = selectedSymptoms.filter(s => s !== sym);
+      updateSymptomUI();
+    }
+
+    function clearSymptoms() {
+      selectedSymptoms = [];
+      document.querySelectorAll('.symptom-pill').forEach(p => p.classList.remove('selected'));
+      updateSymptomUI();
+    }
+
+    async function analyzeDisease() {
+      if (selectedSymptoms.length < 1) { toast('Select at least 1 symptom', 'error'); return; }
+      setLoading('diseaseBtn', true);
+      try {
+        const res = await fetch(`${API}/api/disease`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('hf_token')}` },
+          body: JSON.stringify({ symptoms: selectedSymptoms })
+        });
+        if (!res.ok) throw new Error((await res.json()).detail || 'Disease analysis failed');
+        const data = await res.json();
+        state.results.disease = data.disease;
+
+        document.getElementById('diseaseResult').innerHTML = `
+      <div class="disease-result" style="width:100%;">
+        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.6rem;">🩺 AI Diagnosis</div>
+        <div class="disease-name">${data.disease}</div>
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+          <div class="confidence-num">${data.confidence}%</div>
+          <div><div style="font-size:.7rem;color:var(--muted);">Confidence</div><span class="badge badge-safe">AI Prediction</span></div>
+        </div>
+        <div class="prog-wrap" style="margin-bottom:1.2rem;"><div class="prog-bar" style="background:var(--teal);width:${data.confidence}%;"></div></div>
+        <div class="sec-lbl">Top 3 Differential</div>
+        ${data.top3.map((t, i) => `<div class="top3-row"><div class="top3-head"><span>${['🥇', '🥈', '🥉'][i]} ${t.disease}</span><span class="top3-pct">${t.confidence}%</span></div><div class="prog-wrap"><div class="prog-bar" style="background:${['var(--teal)', 'rgba(0,229,195,.5)', 'rgba(0,229,195,.25)'][i]};width:${t.confidence}%;"></div></div></div>`).join('')}
+      </div>`;
+
+        // Fill tabs from real API data
+        const info = data.info;
+        document.getElementById('dt1').innerHTML = (info.description || []).map(d => `<div class="info-row">${d}</div>`).join('') || '<div class="info-row">No description available.</div>';
+        document.getElementById('dt2').innerHTML = `<div class="g3" style="gap:.6rem;">${(info.medications || []).map(m => `<div style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:var(--r-sm);padding:.8rem;text-align:center;"><div style="font-size:1.4rem;margin-bottom:.4rem;">💊</div><div style="font-size:.8rem;">${m}</div></div>`).join('')}</div>`;
+        document.getElementById('dt3').innerHTML = (info.precautions || []).map(p => `<div class="info-row" style="border-left-color:var(--amber);">⚠️ ${p}</div>`).join('');
+        document.getElementById('dt4').innerHTML = (info.diet || []).map(d => `<div class="info-row" style="border-left-color:var(--teal);">🥗 ${d}</div>`).join('');
+        document.getElementById('dt5').innerHTML = `<div class="g2" style="gap:.6rem;">${(info.workout || []).map(w => `<div style="background:rgba(0,229,195,.04);border:1px solid var(--border);border-radius:var(--r-sm);padding:.7rem .9rem;font-size:.82rem;">🏃 ${w}</div>`).join('')}</div>`;
+
+        document.getElementById('diseaseInfo').style.display = 'block';
+        addHistory('disease', null, data.disease);
+
+        // Update Hybrid AI context
+        currentPredictionContext = `Prediction Type: Disease Diagnosis\nPredicted Disease: ${data.disease}\nConfidence: ${data.confidence}%\nTop 3 Differential: ${JSON.stringify(data.top3.map(t => t.disease))}`;
+
+        setTimeout(() => document.querySelectorAll('.reveal').forEach(el => el.classList.add('in')), 100);
+        toast('Diagnosis complete 🩺');
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+      setLoading('diseaseBtn', false, '⚡ Diagnose & Recommend');
+    }
+
+    // ─────────────────────────────────────────────
+    //  SKIN DETECTION
+    // ─────────────────────────────────────────────
+    const SKIN_DATA = [
+      { name: 'Actinic keratosis', emoji: '🔴', sev: 'High', color: '#ef4444' },
+      { name: 'Atopic Dermatitis', emoji: '🟡', sev: 'Moderate', color: '#f59e0b' },
+      { name: 'Benign keratosis', emoji: '🟢', sev: 'Low', color: '#10b981' },
+      { name: 'Dermatofibroma', emoji: '🟢', sev: 'Low', color: '#10b981' },
+      { name: 'Melanocytic nevus', emoji: '🟡', sev: 'Monitor', color: '#f59e0b' },
+      { name: 'Melanoma', emoji: '🔴', sev: 'CRITICAL', color: '#dc2626' },
+      { name: 'Squamous cell carcinoma', emoji: '🔴', sev: 'High', color: '#ef4444' },
+      { name: 'Tinea Ringworm', emoji: '🟡', sev: 'Moderate', color: '#f59e0b' },
+    ];
+
+    function initSkinGrid() {
+      document.getElementById('skinGrid').innerHTML = SKIN_DATA.map(c => `
+    <div class="card" style="border-top:2px solid ${c.color};padding:1rem;">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem;"><span style="font-size:1.2rem;">${c.emoji}</span><div style="font-size:.8rem;font-weight:700;">${c.name}</div></div>
+      <span class="badge" style="background:${c.color}18;color:${c.color};border:1px solid ${c.color}40;font-size:.6rem;">${c.sev}</span>
+    </div>`).join('');
+    }
+
+    function previewSkin(event) {
+      const file = event.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('uploadPlaceholder').style.display = 'none';
+        const prev = document.getElementById('skinPreview'); prev.src = e.target.result; prev.style.display = 'block';
+        document.getElementById('imgInfo').style.display = 'block';
+        document.getElementById('imgInfo').textContent = `📁 ${file.name} · ${(file.size / 1024).toFixed(1)} KB · ${file.type.split('/')[1].toUpperCase()}`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleDrop(e) {
+      e.preventDefault(); document.getElementById('uploadZone').classList.remove('drag');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const input = document.getElementById('skinInput');
+        const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files;
+        previewSkin({ target: input });
+      }
+    }
+
+    async function analyzeSkin() {
+      const preview = document.getElementById('skinPreview');
+      if (preview.style.display === 'none') { toast('Upload a skin image first', 'error'); return; }
+      const input = document.getElementById('skinInput');
+      if (!input.files[0]) { toast('No image selected', 'error'); return; }
+
+      setLoading('skinBtn', true);
+      try {
+        const formData = new FormData();
+        formData.append('file', input.files[0]);
+        const res = await fetch(`${API}/api/skin`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${sessionStorage.getItem('hf_token')}` },
+          body: formData
+        });
+        if (!res.ok) throw new Error((await res.json()).detail || 'Skin analysis failed');
+        const data = await res.json();
+
+        const top = data.predictions[0];
+        const skinInfo = SKIN_DATA.find(s => s.name.toLowerCase() === top.disease.toLowerCase()) || { color: '#00e5c3', sev: 'Unknown', emoji: '🔬' };
+        const isCritical = skinInfo.sev === 'CRITICAL' || skinInfo.sev === 'High';
+
+        document.getElementById('skinResult').innerHTML = `
+      <div style="width:100%;">
+        <div class="card" style="border-top:3px solid ${skinInfo.color};margin-bottom:1rem;padding:1.8rem;">
+          <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.6rem;">Primary Diagnosis · ${data.model} Model</div>
+          <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;"><span style="font-size:2rem;">${skinInfo.emoji}</span><div style="font-family:'Instrument Serif',serif;font-size:1.5rem;color:#fff;">${top.disease}</div></div>
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <div style="font-family:'Instrument Serif',serif;font-size:2.5rem;color:${skinInfo.color};">${top.confidence}%</div>
+            <div><div style="font-size:.7rem;color:var(--muted);">Confidence</div><span class="badge" style="background:${skinInfo.color}18;color:${skinInfo.color};border:1px solid ${skinInfo.color}40;">${skinInfo.sev}</span></div>
+          </div>
+          ${data.severity ? `<div style="margin-top:.7rem;font-size:.8rem;color:var(--muted);">Severity Model: <strong style="color:var(--text);">${data.severity}</strong></div>` : ''}
+          ${isCritical ? `<div style="background:rgba(255,78,106,.08);border-left:2px solid var(--rose);border-radius:var(--r-sm);padding:.6rem .8rem;margin-top:.8rem;font-size:.78rem;color:rgba(220,232,240,.7);">⚠️ Consult a dermatologist or oncologist immediately</div>` : ''}
+        </div>
+        <div class="sec-lbl">Top 3 Differential</div>
+        ${data.predictions.map((p, i) => {
+          const si = SKIN_DATA.find(s => s.name.toLowerCase() === p.disease.toLowerCase()) || { color: 'var(--teal)' };
+          return `<div class="top3-row"><div class="top3-head"><span>${['🥇', '🥈', '🥉'][i]} ${p.disease}</span><span class="top3-pct" style="color:${si.color};">${p.confidence}%</span></div><div class="prog-wrap"><div class="prog-bar" style="background:${si.color};width:${p.confidence}%;"></div></div></div>`;
+        }).join('')}
+        ${isCritical ? `<div class="alert-banner" style="margin-top:1rem;"><div class="alert-icon">🚨</div><div><div class="alert-title">Critical Skin Condition Detected</div><div class="alert-body">Please consult a board-certified dermatologist immediately. Do not delay.</div></div></div>` : ''}
+      </div>`;
+
+        // Update Hybrid AI context
+        currentPredictionContext = `Prediction Type: Skin Condition\nPredicted Condition: ${top.disease}\nSeverity: ${skinInfo.sev}\nConfidence: ${top.confidence}%\nTop 3 Differential: ${JSON.stringify(data.predictions.map(p => p.disease))}`;
+
+        toast('Skin analysis complete 🔬');
+      } catch (e) {
+        toast(e.message, 'error');
+        if (e.message.includes('not loaded')) toast('Place .pth model files in models/ folder', 'error', 5000);
+      }
+      setLoading('skinBtn', false, '🔬 Analyze Skin Image');
+    }
+
+    // ─────────────────────────────────────────────
+    //  RISK MONITOR
+    // ─────────────────────────────────────────────
+    function updateMonitor() {
+      const h = state.results.heart, d = state.results.diabetes;
+      if (h === null && d === null) { document.getElementById('monitorEmpty').style.display = 'block'; document.getElementById('monitorData').style.display = 'none'; return; }
+      document.getElementById('monitorEmpty').style.display = 'none';
+      document.getElementById('monitorData').style.display = 'block';
+      const hp = h || 0, dp = d || 0, uhri = hp * .6 + dp * .4;
+      const { label, color, badgeClass } = getRiskInfo(uhri);
+      document.getElementById('uhriVal').textContent = (uhri * 100).toFixed(1) + '%';
+      document.getElementById('uhriVal').style.color = color;
+      document.getElementById('uhriBadge').innerHTML = `<span class="badge ${badgeClass}" style="font-size:.9rem;padding:5px 16px;">${label}</span>`;
+      document.getElementById('monHeart').textContent = (hp * 100).toFixed(1) + '%';
+      document.getElementById('monDiab').textContent = (dp * 100).toFixed(1) + '%';
+      document.getElementById('monUhri2').textContent = (uhri * 100).toFixed(1) + '%';
+      setTimeout(() => {
+        document.getElementById('monHeartBar').style.width = (hp * 100) + '%';
+        document.getElementById('monDiabBar').style.width = (dp * 100) + '%';
+        document.getElementById('monUhriBar').style.width = (uhri * 100) + '%';
+      }, 100);
+
+      if (!window._radar) {
+        window._radar = new Chart(document.getElementById('radarChart').getContext('2d'), { type: 'radar', data: { labels: ['Heart Risk', 'Diabetes Risk', 'UHRI', 'Overall Health', 'Lifestyle'], datasets: [{ label: 'Your Profile', data: [hp * 100, dp * 100, uhri * 100, (1 - uhri) * 100, 65], borderColor: 'var(--teal)', backgroundColor: 'rgba(0,229,195,.08)', pointBackgroundColor: 'var(--teal)', borderWidth: 2 }] }, options: { plugins: { legend: { labels: { color: 'rgba(220,232,240,.5)' } } }, scales: { r: { ticks: { color: 'rgba(220,232,240,.3)', backdropColor: 'transparent' }, grid: { color: 'rgba(255,255,255,.07)' }, pointLabels: { color: 'rgba(220,232,240,.6)', font: { size: 10 } }, min: 0, max: 100 } }, animation: { duration: 1500 } } });
+      } else {
+        window._radar.data.datasets[0].data = [hp * 100, dp * 100, uhri * 100, (1 - uhri) * 100, 65];
+        window._radar.update();
+      }
+
+      document.getElementById('historyList').innerHTML = state.history.slice(-6).reverse().map(h => `
+    <div class="tl-row">
+      <div class="tl-dot ${h.type === 'heart' ? 'rose' : h.type === 'diabetes' ? 'amber' : 'teal'}"></div>
+      <div><div class="tl-time">${h.time}</div><div class="tl-text">${h.type === 'disease' ? '🩺 ' + h.label : (h.type === 'heart' ? '❤️ ' : '🍬 ') + h.prob + ' — ' + h.label}</div></div>
+    </div>`).join('');
+    }
+
+    // ─────────────────────────────────────────────
+    //  REPORTS
+    // ─────────────────────────────────────────────
+    function updateReportPreview() {
+      const h = state.results.heart, d = state.results.diabetes;
+      if (h !== null) { document.getElementById('prevHeart').textContent = '❤️  Heart Risk     :  ' + (h * 100).toFixed(1) + '% — ' + getRiskInfo(h).label; }
+      if (d !== null) { document.getElementById('prevDiab').textContent = '🍬  Diabetes Risk  :  ' + (d * 100).toFixed(1) + '% — ' + getRiskInfo(d).label; }
+      if (h !== null && d !== null) { const u = h * .6 + d * .4; document.getElementById('prevUhri').textContent = '🧬  UHRI Score    :  ' + (u * 100).toFixed(1) + '% — ' + getRiskInfo(u).label; }
+      if (state.results.disease) { document.getElementById('prevDisease').textContent = '🩺  Diagnosis     :  ' + state.results.disease; }
+    }
+
+    async function generateReport() {
+      const name = document.getElementById('reportName').value;
+      if (!name) { toast('Enter patient name', 'error'); return; }
+      if (!state.results.heart && !state.results.diabetes && !state.results.disease) { toast('Run at least one analysis first', 'error'); return; }
+
+      setLoading('reportBtn', true);
+      try {
+        const payload = {
+          patient_name: name,
+          heart_prob: document.getElementById('incHeart').checked ? state.results.heart : null,
+          diabetes_prob: document.getElementById('incDiab').checked ? state.results.diabetes : null,
+          disease: document.getElementById('incDisease').checked ? state.results.disease : null,
+        };
+        if (payload.heart_prob && payload.diabetes_prob) {
+          payload.uhri = payload.heart_prob * .6 + payload.diabetes_prob * .4;
+        }
+
+        const res = await fetch(`${API}/api/report`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('hf_token')}` }, body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Report generation failed');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `HealthFusion_Report_${name}.pdf`; a.click();
+        toast('PDF report downloaded! 📄');
+      } catch (e) {
+        toast(e.message || 'PDF generation failed', 'error');
+      }
+      setLoading('reportBtn', false, '📥 Download PDF Report');
+    }
+
+    // ─────────────────────────────────────────────
+    //  SCROLL REVEAL
+    // ─────────────────────────────────────────────
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold: .08 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    document.querySelectorAll('#authPage .reveal').forEach(el => setTimeout(() => el.classList.add('in'), 200));
+    // ─────────────────────────────────────────────
+    //  HYBRID AI CHATBOT LOGIC
+    // ─────────────────────────────────────────────
+    // Tracks context from the latest prediction run
+    let currentPredictionContext = "";
+
+    function toggleChat() {
+      const panel = document.getElementById('chatbotPanel');
+      panel.classList.toggle('active');
+      if (panel.classList.contains('active')) {
+        document.getElementById('chatInput').focus();
+      }
+    }
+
+    function handleChatKey(e) {
+      if (e.key === 'Enter') sendChatMessage();
+    }
+
+    function appendMessage(text, isUser) {
+      const msgs = document.getElementById('chatbotMessages');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = isUser ? 'user-msg' : 'bot-msg';
+      msgDiv.innerHTML = text; // allow basic html for boldness
+      msgs.appendChild(msgDiv);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+      const msgs = document.getElementById('chatbotMessages');
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'typing-indicator';
+      typingDiv.id = 'typingIndicator';
+      typingDiv.innerHTML = '<span></span><span></span><span></span>';
+      msgs.appendChild(typingDiv);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const el = document.getElementById('typingIndicator');
+      if (el) el.remove();
+    }
+
+    // Format markdown bolding nicely
+    function formatBotResponse(text) {
+      return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMessage(text, true);
+      input.value = '';
+      input.disabled = true;
+      document.getElementById('chatSendBtn').disabled = true;
+
+      showTypingIndicator();
+
+      try {
+        const payload = {
+          message: text,
+          context: currentPredictionContext // Inject context silently
+        };
+
+        const res = await fetch(`${API}/api/chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionStorage.getItem('hf_token')}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        removeTypingIndicator();
+
+        if (!res.ok) {
+          throw new Error('Chat API returned an error.');
+        }
+
+        const data = await res.json();
+        appendMessage(formatBotResponse(data.reply), false);
+
+      } catch (e) {
+        removeTypingIndicator();
+        appendMessage('<span style="color:var(--rose);">Sorry, I am having trouble connecting to the AI server. Is the API Key configured?</span>', false);
+        console.error("Chat Error:", e);
+      }
+
+      input.disabled = false;
+      document.getElementById('chatSendBtn').disabled = false;
+      input.focus();
+    }
+
+  </script>
+</body>
+
+</html>

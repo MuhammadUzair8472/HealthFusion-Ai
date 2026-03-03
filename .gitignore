@@ -1,0 +1,9 @@
+hfv2/
+__pycache__/
+.env
+*.db
+dataset/
+notebook/
+
+*.zip
+Output Images/
