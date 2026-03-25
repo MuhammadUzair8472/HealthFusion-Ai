@@ -35,6 +35,14 @@ try:
 except: BCRYPT_AVAILABLE = False
 
 try:
+    import cv2
+    from ultralytics import YOLO
+    import base64
+    YOLO_AVAILABLE = True
+except ImportError:
+    YOLO_AVAILABLE = False
+
+try:
     from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
     from reportlab.lib.units import inch
@@ -67,36 +75,41 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 #  DATABASE SETUP
 # ─────────────────────────────────────────────
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
 
 def init_db():
     conn = get_db()
-    conn.executescript("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE IF NOT EXISTS predictions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            pred_type TEXT,
-            heart_prob REAL,
-            diabetes_prob REAL,
-            uhri REAL,
-            risk_level TEXT,
-            disease_name TEXT,
-            confidence REAL,
-            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(user_id) REFERENCES users(id)
-        );
-    """)
-    conn.commit()
-    conn.close()
+    try:
+        # Enable WAL mode once for concurrent access
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=30000")
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS predictions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                pred_type TEXT,
+                heart_prob REAL,
+                diabetes_prob REAL,
+                uhri REAL,
+                risk_level TEXT,
+                disease_name TEXT,
+                confidence REAL,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(id)
+            );
+        """)
+        conn.commit()
+    finally:
+        conn.close()
 
 init_db()
 
@@ -230,6 +243,37 @@ def load_skin():
 
 SKIN_M = load_skin()
 
+def load_brain():
+    R = {}
+    if not TORCH_AVAILABLE: return R
+    
+    p = "models/EfficientNet_v2_Phase1_best.pth"
+    if os.path.exists(p):
+        try:
+            st = torch.load(p, map_location='cpu')
+            state_dict = st.get('model_state_dict', st.get('state_dict', st))
+            
+            m = tvm.efficientnet_b0(weights=None)
+            m.classifier = nn.Sequential(
+                nn.Dropout(p=0.2, inplace=True),
+                nn.Linear(1280, 256, bias=True),
+                nn.BatchNorm1d(256),
+                nn.ReLU(inplace=True),
+                nn.Dropout(p=0.5),
+                nn.Linear(256, 4, bias=True)
+            )
+            m.load_state_dict(state_dict)
+            m.eval()
+            R['model'] = m
+            R['model_name'] = "EfficientNet-B0"
+        except Exception as e:
+            print(f"Failed to load Brain model: {e}")
+            pass
+            
+    return R
+
+BRAIN_M = load_brain()
+
 # ─────────────────────────────────────────────
 #  HELPERS
 # ─────────────────────────────────────────────
@@ -291,18 +335,19 @@ class ChatIn(BaseModel):
 def register(data: RegisterIn):
     if len(data.username) < 3: raise HTTPException(400, "Username too short")
     if len(data.password) < 4: raise HTTPException(400, "Password too short")
+    conn = get_db()
     try:
-        conn = get_db()
         conn.execute("INSERT INTO users (username,email,password_hash) VALUES (?,?,?)",
                      (data.username.strip(), data.email.strip(), hash_pw(data.password)))
         conn.commit()
         uid = conn.execute("SELECT id FROM users WHERE username=?", (data.username,)).fetchone()['id']
-        conn.close()
         token = secrets.token_hex(32)
         SESSIONS[token] = uid
         return {"token": token, "username": data.username, "user_id": uid}
     except sqlite3.IntegrityError:
         raise HTTPException(400, "Username or email already exists")
+    finally:
+        conn.close()
 
 @app.post("/api/auth/login")
 def login(data: LoginIn):
@@ -333,9 +378,12 @@ def health():
             "diabetes": "diabetes_model" in M,
             "disease": "disease_model" in M,
             "skin": "model" in SKIN_M,
+            "brain_yolo": "yolo" in BRAIN_M,
+            "brain_sam": "sam" in BRAIN_M,
         },
         "shap": SHAP_AVAILABLE,
         "torch": TORCH_AVAILABLE,
+        "yolo": YOLO_AVAILABLE,
         "db": os.path.exists(DB_PATH),
         "time": datetime.now().isoformat()
     }
@@ -487,6 +535,47 @@ async def skin(file: UploadFile = File(...), user_id: int = Depends(require_user
         with torch.no_grad():
             sev = ["Mild","Moderate","Severe"][torch.argmax(torch.softmax(SKIN_M['severity_model'](t),dim=1)[0]).item()]
     return {"predictions":preds,"severity":sev,"model":SKIN_M.get('model_name','CNN')}
+
+# ─────────────────────────────────────────────
+#  BRAIN TUMOR (YOLO + SAM2)
+# ─────────────────────────────────────────────
+@app.post("/api/brain")
+async def brain_tumor(file: UploadFile = File(...), user_id: int = Depends(require_user)):
+    if not TORCH_AVAILABLE or 'model' not in BRAIN_M:
+        raise HTTPException(503, "Brain model not found. Place EfficientNet_v2_Phase1_best.pth in models/")
+    
+    img = PILImage.open(io.BytesIO(await file.read())).convert("RGB")
+    t = transforms.Compose([
+        transforms.Resize((224,224)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])(img).unsqueeze(0)
+    
+    names = ["Glioma", "Meningioma", "No Tumor", "Pituitary"]
+    with torch.no_grad():
+        out = BRAIN_M['model'](t)
+        pr = torch.softmax(out, dim=1)[0]
+    
+    tp, ti = torch.topk(pr, 4)
+    preds = [{"disease": names[i], "confidence": round(float(p)*100, 1)}
+             for p, i in zip(tp.tolist(), ti.tolist())]
+    
+    top_pred = preds[0]
+    
+    # Generate base64 for the original image for frontend display
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG")
+    orig_b64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+    
+    return {
+        "predictions": preds,
+        "model": BRAIN_M.get('model_name', 'EfficientNet-B0'),
+        "images": {
+            "original": f"data:image/jpeg;base64,{orig_b64}",
+            "detection": None,
+            "segmentation": None
+        }
+    }
 
 # ─────────────────────────────────────────────
 #  PDF REPORT

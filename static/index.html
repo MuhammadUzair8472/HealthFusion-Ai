@@ -1811,6 +1811,8 @@
           Checker</div>
         <div class="nav-item" onclick="navigate('skin')" data-page="skin"><span class="nav-icon">🔬</span> Skin
           Detection <span class="nav-badge">CNN</span></div>
+        <div class="nav-item" onclick="navigate('brain')" data-page="brain"><span class="nav-icon">🧠</span> Brain
+          Tumor <span class="nav-badge">YOLO</span></div>
         <div class="nav-label">Insights</div>
         <div class="nav-item" onclick="navigate('monitor')" data-page="monitor"><span class="nav-icon">📊</span> Risk
           Monitor</div>
@@ -1857,8 +1859,8 @@
               <div>
                 <div style="font-family:'Instrument Serif',serif;font-size:1.6rem;color:#fff;">HealthFusion AI Platform
                 </div>
-                <div style="font-size:.82rem;color:var(--muted);">Heart · Diabetes · 41-Disease Checker · CNN Skin
-                  Analysis — FastAPI Powered</div>
+                <div style="font-size:.82rem;color:var(--muted);">Heart · Diabetes · Disease · Skin · Brain Tumor —
+                  FastAPI Powered</div>
               </div>
             </div>
             <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;">
@@ -1885,13 +1887,13 @@
               <div class="metric-icon">🦠</div>
               <div class="metric-val" style="color:var(--violet);">41</div>
               <div class="metric-label">Diseases Covered</div>
-              <div class="metric-change up">+ 8 Skin Conditions</div>
+              <div class="metric-change up">+ Skin & Brain Tumor</div>
             </div>
             <div class="metric">
-              <div class="metric-icon">🔬</div>
-              <div class="metric-val" style="color:var(--amber);">132</div>
-              <div class="metric-label">Symptom Markers</div>
-              <div class="metric-change up">↑ Comprehensive</div>
+              <div class="metric-icon">🚀</div>
+              <div class="metric-val" style="color:var(--amber);">YOLO+SAM2</div>
+              <div class="metric-label">State-of-the-Art</div>
+              <div class="metric-change up">↑ Brain Analytics</div>
             </div>
           </div>
           <div class="g3 reveal" style="margin-bottom:1.5rem;">
@@ -1930,6 +1932,18 @@
               <div style="font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem;">132-symptom model
                 for 41 diseases with medicine, diet &amp; workout.</div>
               <div style="text-align:right;font-size:.78rem;color:var(--teal);">Check →</div>
+            </div>
+            <div class="card" style="cursor:pointer;border-top:2px solid #a855f7;" onclick="navigate('brain')">
+              <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;"><span
+                  style="font-size:2rem;">🧠</span>
+                <div>
+                  <div style="font-weight:700;">Brain Tumor</div><span class="badge badge-safe"
+                    style="font-size:.6rem;">YOLOv11 + SAM2</span>
+                </div>
+              </div>
+              <div style="font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem;">Advanced detection
+                and segmentation of brain MRIs.</div>
+              <div style="text-align:right;font-size:.78rem;color:#a855f7;">Analyze →</div>
             </div>
           </div>
           <div class="g2 reveal">
@@ -2281,182 +2295,251 @@
             Consult a qualified dermatologist. ~80% accuracy.</div>
         </div>
 
-        <!-- MONITOR -->
-        <div class="page" id="page-monitor">
-          <div class="page-header">
-            <div class="page-eyebrow">Unified Analysis</div>
-            <div class="page-title">📊 Risk<br><em style="color:var(--sky);">Monitor</em></div>
-            <div class="page-sub">Unified Health Risk Index combining Heart Disease and Diabetes probabilities.</div>
-          </div>
-          <div id="monitorEmpty" class="card" style="text-align:center;padding:4rem;margin-bottom:1.5rem;">
-            <div style="font-size:3rem;margin-bottom:1rem;opacity:.4;">📊</div>
-            <div style="font-size:.9rem;color:var(--muted);margin-bottom:1rem;">Run Heart and Diabetes analyses to see
-              your unified risk score.</div>
-            <div style="display:flex;gap:.8rem;justify-content:center;"><button class="btn btn-outline"
-                onclick="navigate('heart')">Analyze Heart →</button><button class="btn btn-outline"
-                onclick="navigate('diabetes')">Analyze Diabetes →</button></div>
-          </div>
-          <div id="monitorData" style="display:none;">
-            <div class="card card-sky" style="text-align:center;padding:2.5rem;margin-bottom:1.5rem;">
-              <div
-                style="font-size:.65rem;color:var(--muted2);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.5rem;">
-                Unified Health Risk Index</div>
-              <div id="uhriVal"
-                style="font-family:'Instrument Serif',serif;font-size:5rem;line-height:1;letter-spacing:-2px;">—</div>
-              <div id="uhriBadge" style="margin:.8rem 0;"></div>
-            </div>
-            <div class="g3" style="margin-bottom:1.5rem;">
-              <div class="card" style="text-align:center;">
-                <div
-                  style="font-size:.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">
-                  ❤️ Heart Risk</div>
-                <div id="monHeart" style="font-family:'Instrument Serif',serif;font-size:2.5rem;color:var(--rose);">—
-                </div>
-                <div class="prog-wrap" style="margin-top:.6rem;">
-                  <div class="prog-bar" id="monHeartBar" style="background:var(--rose);width:0%;"></div>
-                </div>
-              </div>
-              <div class="card" style="text-align:center;">
-                <div
-                  style="font-size:.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">
-                  🍬 Diabetes Risk</div>
-                <div id="monDiab" style="font-family:'Instrument Serif',serif;font-size:2.5rem;color:var(--amber);">—
-                </div>
-                <div class="prog-wrap" style="margin-top:.6rem;">
-                  <div class="prog-bar" id="monDiabBar" style="background:var(--amber);width:0%;"></div>
-                </div>
-              </div>
-              <div class="card" style="text-align:center;">
-                <div
-                  style="font-size:.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">
-                  🧬 UHRI Score</div>
-                <div id="monUhri2" style="font-family:'Instrument Serif',serif;font-size:2.5rem;color:var(--sky);">—
-                </div>
-                <div class="prog-wrap" style="margin-top:.6rem;">
-                  <div class="prog-bar" id="monUhriBar" style="background:var(--sky);width:0%;"></div>
-                </div>
-              </div>
-            </div>
-            <div class="g2">
-              <div class="card">
-                <div class="sec-lbl">Health Radar</div><canvas id="radarChart" height="240"></canvas>
-              </div>
-              <div class="card">
-                <div class="sec-lbl">Analysis History</div>
-                <div id="historyList"></div>
-              </div>
-            </div>
+      </div>
+
+      <!-- BRAIN TUMOR -->
+      <div class="page" id="page-brain">
+        <div class="page-header">
+          <div class="page-eyebrow">Object Detection & Segmentation</div>
+          <div class="page-title">🧠 Brain Tumor<br><em style="color:#a855f7;">Analysis</em></div>
+          <div class="page-sub">EfficientNet classification detects 4 classes of brain tumors instantly.
           </div>
         </div>
-
-        <!-- REPORTS -->
-        <div class="page" id="page-reports">
-          <div class="page-header">
-            <div class="page-eyebrow">Documentation</div>
-            <div class="page-title">📄 Medical<br><em style="color:var(--muted);">Report Generator</em></div>
-            <div class="page-sub">Generate a comprehensive PDF health report from your AI analysis results.</div>
+        <div class="g2 reveal" style="margin-bottom:1.2rem;">
+          <div class="card">
+            <div class="sec-lbl">Upload Brain MRI</div>
+            <div class="upload-zone" id="brainUploadZone" onclick="document.getElementById('brainInput').click()"
+              ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')"
+              ondrop="handleBrainDrop(event)">
+              <input type="file" id="brainInput" accept="image/*" onchange="previewBrain(event)">
+              <div id="brainUploadPlaceholder">
+                <div style="font-size:3rem;margin-bottom:.8rem;opacity:.45;">🧠</div>
+                <div style="font-size:.9rem;font-weight:600;color:var(--muted);margin-bottom:.3rem;">Drop MRI image
+                  here</div>
+                <div style="font-size:.75rem;color:var(--muted2);">JPG · PNG · WEBP</div>
+              </div>
+              <img id="brainPreview" class="upload-img-preview"
+                style="display:none; max-height: 200px; object-fit: contain;">
+            </div>
+            <div id="brainImgInfo"
+              style="display:none;margin-top:.6rem;font-size:.75rem;color:var(--muted);background:var(--glass2);border:1px solid var(--border);border-radius:var(--r-sm);padding:.45rem .8rem;">
+            </div>
+            <button class="btn btn-primary btn-full" id="brainBtn" onclick="analyzeBrain()"
+              style="margin-top:1rem;background:#a855f7;">⚡
+              Analyze Brain MRI</button>
           </div>
-          <div class="g2 reveal">
-            <div class="card">
-              <div class="sec-lbl">Report Configuration</div>
-              <div style="display:flex;flex-direction:column;gap:.9rem;">
-                <div class="form-group"><label class="form-label">Patient Full Name</label><input class="form-input"
-                    id="reportName" placeholder="Enter patient name"></div>
-                <div class="form-group"><label class="form-label">Report Date</label><input class="form-input"
-                    id="reportDate" type="date"></div>
-                <div class="form-group"><label class="form-label">Include Sections</label>
-                  <div style="display:flex;flex-direction:column;gap:.4rem;margin-top:.3rem;">
-                    <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;"><input
-                        type="checkbox" id="incHeart" checked> ❤️ Heart Disease Analysis</label>
-                    <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;"><input
-                        type="checkbox" id="incDiab" checked> 🍬 Diabetes Risk Analysis</label>
-                    <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;"><input
-                        type="checkbox" id="incDisease" checked> 🩺 Disease Diagnosis</label>
+          <div id="brainResult" class="card" style="display:flex;align-items:center;justify-content:center;">
+            <div style="text-align:center;opacity:.35;" id="brainEmptyState">
+              <div style="font-size:3rem;margin-bottom:.8rem;">🔬</div>
+              <div style="font-size:.85rem;color:var(--muted);">Upload an MRI to analyze</div>
+            </div>
+            <div id="brainOutputContent" style="display:none;width:100%;padding:1rem;">
+              <div style="text-align:center; margin-bottom: 1.5rem;">
+                <div
+                  style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.6rem;">
+                  Primary Diagnosis · <span id="brainModelName">EfficientNet</span></div>
+                <div id="brainDiagnosis"
+                  style="font-family:'Instrument Serif',serif;font-size:2.5rem;color:#a855f7;line-height:1.2;">-</div>
+                <div style="display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:.5rem;">
+                  <div id="brainConfidence" style="font-size:2rem;color:var(--text);">-</div>
+                  <div>
+                    <div style="font-size:.7rem;color:var(--muted);">Confidence</div><span class="badge" id="brainBadge"
+                      style="background:rgba(168,85,247,0.1);color:#a855f7;border:1px solid rgba(168,85,247,0.4);">AI
+                      Prediction</span>
                   </div>
                 </div>
-                <button class="btn btn-primary btn-full" id="reportBtn" onclick="generateReport()">📥 Download PDF
-                  Report</button>
               </div>
+
+              <div style="display:flex;gap:1.5rem;align-items:flex-start;">
+                <div style="flex:1;text-align:center;">
+                  <img id="brainOrigImg" style="max-width:100%; border-radius: 8px; border: 1px solid var(--border);">
+                </div>
+                <div style="flex:1;">
+                  <div class="sec-lbl">Top Differential</div>
+                  <div id="brainDifferential"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MONITOR -->
+      <div class="page" id="page-monitor">
+        <div class="page-header">
+          <div class="page-eyebrow">Unified Analysis</div>
+          <div class="page-title">📊 Risk<br><em style="color:var(--sky);">Monitor</em></div>
+          <div class="page-sub">Unified Health Risk Index combining Heart Disease and Diabetes probabilities.</div>
+        </div>
+        <div id="monitorEmpty" class="card" style="text-align:center;padding:4rem;margin-bottom:1.5rem;">
+          <div style="font-size:3rem;margin-bottom:1rem;opacity:.4;">📊</div>
+          <div style="font-size:.9rem;color:var(--muted);margin-bottom:1rem;">Run Heart and Diabetes analyses to see
+            your unified risk score.</div>
+          <div style="display:flex;gap:.8rem;justify-content:center;"><button class="btn btn-outline"
+              onclick="navigate('heart')">Analyze Heart →</button><button class="btn btn-outline"
+              onclick="navigate('diabetes')">Analyze Diabetes →</button></div>
+        </div>
+        <div id="monitorData" style="display:none;">
+          <div class="card card-sky" style="text-align:center;padding:2.5rem;margin-bottom:1.5rem;">
+            <div
+              style="font-size:.65rem;color:var(--muted2);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.5rem;">
+              Unified Health Risk Index</div>
+            <div id="uhriVal"
+              style="font-family:'Instrument Serif',serif;font-size:5rem;line-height:1;letter-spacing:-2px;">—</div>
+            <div id="uhriBadge" style="margin:.8rem 0;"></div>
+          </div>
+          <div class="g3" style="margin-bottom:1.5rem;">
+            <div class="card" style="text-align:center;">
+              <div
+                style="font-size:.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">
+                ❤️ Heart Risk</div>
+              <div id="monHeart" style="font-family:'Instrument Serif',serif;font-size:2.5rem;color:var(--rose);">—
+              </div>
+              <div class="prog-wrap" style="margin-top:.6rem;">
+                <div class="prog-bar" id="monHeartBar" style="background:var(--rose);width:0%;"></div>
+              </div>
+            </div>
+            <div class="card" style="text-align:center;">
+              <div
+                style="font-size:.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">
+                🍬 Diabetes Risk</div>
+              <div id="monDiab" style="font-family:'Instrument Serif',serif;font-size:2.5rem;color:var(--amber);">—
+              </div>
+              <div class="prog-wrap" style="margin-top:.6rem;">
+                <div class="prog-bar" id="monDiabBar" style="background:var(--amber);width:0%;"></div>
+              </div>
+            </div>
+            <div class="card" style="text-align:center;">
+              <div
+                style="font-size:.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">
+                🧬 UHRI Score</div>
+              <div id="monUhri2" style="font-family:'Instrument Serif',serif;font-size:2.5rem;color:var(--sky);">—
+              </div>
+              <div class="prog-wrap" style="margin-top:.6rem;">
+                <div class="prog-bar" id="monUhriBar" style="background:var(--sky);width:0%;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="g2">
+            <div class="card">
+              <div class="sec-lbl">Health Radar</div><canvas id="radarChart" height="240"></canvas>
             </div>
             <div class="card">
-              <div class="sec-lbl">Report Preview</div>
-              <div
-                style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:var(--r-sm);padding:1.5rem;font-family:'Fira Code',monospace;font-size:.74rem;line-height:1.9;color:var(--muted);">
-                <div style="color:var(--teal);font-size:.9rem;margin-bottom:.5rem;">🧬 HEALTHFUSION AI REPORT</div>
-                <div>━━━━━━━━━━━━━━━━━━━━━━━━━</div>
-                <div id="prevHeart">❤️ Heart Risk : [Run Analysis]</div>
-                <div id="prevDiab">🍬 Diabetes Risk : [Run Analysis]</div>
-                <div id="prevUhri">🧬 UHRI Score : [Run Analysis]</div>
-                <div id="prevDisease">🩺 Diagnosis : [Run Checker]</div>
-                <div>━━━━━━━━━━━━━━━━━━━━━━━━━</div>
-                <div style="font-size:.62rem;color:var(--muted2);margin-top:.4rem;">⚠ Informational purposes only</div>
-              </div>
+              <div class="sec-lbl">Analysis History</div>
+              <div id="historyList"></div>
             </div>
           </div>
         </div>
-
-        <!-- ABOUT -->
-        <div class="page" id="page-about">
-          <div class="page-header">
-            <div class="page-eyebrow">Platform Info</div>
-            <div class="page-title">🧬 About<br><em style="color:var(--teal);">HealthFusion AI</em></div>
-            <div class="page-sub">Advanced AI-powered healthcare decision support with clinical-grade ML models
-            </div>
-          </div>
-          <div class="g3 reveal" style="margin-bottom:1.5rem;">
-            <div class="feat-card card-rose">
-              <div class="feat-icon">❤️</div>
-              <div class="feat-title">Heart Disease Module</div>
-              <div class="feat-desc">Random Forest (Tuned) on UCI Cleveland Dataset. SHAP explainability + What-If
-                simulation.</div><span class="badge badge-safe" style="margin-top:.8rem;display:inline-flex;">85%+
-                Accuracy</span>
-            </div>
-            <div class="feat-card card-amber">
-              <div class="feat-icon">🍬</div>
-              <div class="feat-title">Diabetes Module</div>
-              <div class="feat-desc">XGBoost (Tuned) on PIMA Indians Database. Insulin resistance & metabolic disorder
-                detection.</div><span class="badge badge-safe" style="margin-top:.8rem;display:inline-flex;">80%+
-                Accuracy</span>
-            </div>
-            <div class="feat-card card-teal">
-              <div class="feat-icon">🩺</div>
-              <div class="feat-title">Disease Checker</div>
-              <div class="feat-desc">Random Forest on Kaggle Dataset. 132 symptoms → 41 diseases. Medicine + diet +
-                workout plans.</div><span class="badge badge-safe" style="margin-top:.8rem;display:inline-flex;">99.7%
-                Accuracy</span>
-            </div>
-            <div class="feat-card card-violet">
-              <div class="feat-icon">🔬</div>
-              <div class="feat-title">Skin Detection</div>
-              <div class="feat-desc">CNN Deep Learning (EfficientNet/ResNet/MobileNet). 8 skin conditions from uploaded
-                images.</div><span class="badge badge-violet" style="margin-top:.8rem;display:inline-flex;">~80%
-                Accuracy</span>
-            </div>
-            <div class="feat-card card-sky">
-              <div class="feat-icon">⚡</div>
-              <div class="feat-title">FastAPI Backend</div>
-              <div class="feat-desc">REST API connecting this premium HTML frontend to real Python ML models.
-                CORS-enabled.</div><span class="badge badge-info"
-                style="margin-top:.8rem;display:inline-flex;">Production-Ready</span>
-            </div>
-            <div class="feat-card">
-              <div class="feat-icon">🧠</div>
-              <div class="feat-title">Explainable AI</div>
-              <div class="feat-desc">Real SHAP values show which features drive each prediction — fully transparent AI
-                reasoning.</div><span class="badge badge-warn" style="margin-top:.8rem;display:inline-flex;">SHAP
-                XAI</span>
-            </div>
-          </div>
-          <div class="card" style="background:rgba(255,179,71,.05);border-color:rgba(255,179,71,.2);">
-            <div class="sec-lbl" style="color:var(--amber);">Medical Disclaimer</div>
-            <div style="font-size:.88rem;color:rgba(220,232,240,.7);line-height:1.8;">HealthFusion AI is for Now
-              educational
-              and informational purposes only</div>
-          </div>
-        </div>
-
       </div>
+
+      <!-- REPORTS -->
+      <div class="page" id="page-reports">
+        <div class="page-header">
+          <div class="page-eyebrow">Documentation</div>
+          <div class="page-title">📄 Medical<br><em style="color:var(--muted);">Report Generator</em></div>
+          <div class="page-sub">Generate a comprehensive PDF health report from your AI analysis results.</div>
+        </div>
+        <div class="g2 reveal">
+          <div class="card">
+            <div class="sec-lbl">Report Configuration</div>
+            <div style="display:flex;flex-direction:column;gap:.9rem;">
+              <div class="form-group"><label class="form-label">Patient Full Name</label><input class="form-input"
+                  id="reportName" placeholder="Enter patient name"></div>
+              <div class="form-group"><label class="form-label">Report Date</label><input class="form-input"
+                  id="reportDate" type="date"></div>
+              <div class="form-group"><label class="form-label">Include Sections</label>
+                <div style="display:flex;flex-direction:column;gap:.4rem;margin-top:.3rem;">
+                  <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;"><input
+                      type="checkbox" id="incHeart" checked> ❤️ Heart Disease Analysis</label>
+                  <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;"><input
+                      type="checkbox" id="incDiab" checked> 🍬 Diabetes Risk Analysis</label>
+                  <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;"><input
+                      type="checkbox" id="incDisease" checked> 🩺 Disease Diagnosis</label>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-full" id="reportBtn" onclick="generateReport()">📥 Download PDF
+                Report</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="sec-lbl">Report Preview</div>
+            <div
+              style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:var(--r-sm);padding:1.5rem;font-family:'Fira Code',monospace;font-size:.74rem;line-height:1.9;color:var(--muted);">
+              <div style="color:var(--teal);font-size:.9rem;margin-bottom:.5rem;">🧬 HEALTHFUSION AI REPORT</div>
+              <div>━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+              <div id="prevHeart">❤️ Heart Risk : [Run Analysis]</div>
+              <div id="prevDiab">🍬 Diabetes Risk : [Run Analysis]</div>
+              <div id="prevUhri">🧬 UHRI Score : [Run Analysis]</div>
+              <div id="prevDisease">🩺 Diagnosis : [Run Checker]</div>
+              <div>━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+              <div style="font-size:.62rem;color:var(--muted2);margin-top:.4rem;">⚠ Informational purposes only</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABOUT -->
+      <div class="page" id="page-about">
+        <div class="page-header">
+          <div class="page-eyebrow">Platform Info</div>
+          <div class="page-title">🧬 About<br><em style="color:var(--teal);">HealthFusion AI</em></div>
+          <div class="page-sub">Advanced AI-powered healthcare decision support with clinical-grade ML models
+          </div>
+        </div>
+        <div class="g3 reveal" style="margin-bottom:1.5rem;">
+          <div class="feat-card card-rose">
+            <div class="feat-icon">❤️</div>
+            <div class="feat-title">Heart Disease Module</div>
+            <div class="feat-desc">Random Forest (Tuned) on UCI Cleveland Dataset. SHAP explainability + What-If
+              simulation.</div><span class="badge badge-safe" style="margin-top:.8rem;display:inline-flex;">85%+
+              Accuracy</span>
+          </div>
+          <div class="feat-card card-amber">
+            <div class="feat-icon">🍬</div>
+            <div class="feat-title">Diabetes Module</div>
+            <div class="feat-desc">XGBoost (Tuned) on PIMA Indians Database. Insulin resistance & metabolic disorder
+              detection.</div><span class="badge badge-safe" style="margin-top:.8rem;display:inline-flex;">80%+
+              Accuracy</span>
+          </div>
+          <div class="feat-card card-teal">
+            <div class="feat-icon">🩺</div>
+            <div class="feat-title">Disease Checker</div>
+            <div class="feat-desc">Random Forest on Kaggle Dataset. 132 symptoms → 41 diseases. Medicine + diet +
+              workout plans.</div><span class="badge badge-safe" style="margin-top:.8rem;display:inline-flex;">99.7%
+              Accuracy</span>
+          </div>
+          <div class="feat-card card-violet">
+            <div class="feat-icon">🔬</div>
+            <div class="feat-title">Skin Detection</div>
+            <div class="feat-desc">CNN Deep Learning (EfficientNet/ResNet/MobileNet). 8 skin conditions from uploaded
+              images.</div><span class="badge badge-violet" style="margin-top:.8rem;display:inline-flex;">~80%
+              Accuracy</span>
+          </div>
+          <div class="feat-card card-sky">
+            <div class="feat-icon">⚡</div>
+            <div class="feat-title">FastAPI Backend</div>
+            <div class="feat-desc">REST API connecting this premium HTML frontend to real Python ML models.
+              CORS-enabled.</div><span class="badge badge-info"
+              style="margin-top:.8rem;display:inline-flex;">Production-Ready</span>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">🧠</div>
+            <div class="feat-title">Explainable AI</div>
+            <div class="feat-desc">Real SHAP values show which features drive each prediction — fully transparent AI
+              reasoning.</div><span class="badge badge-warn" style="margin-top:.8rem;display:inline-flex;">SHAP
+              XAI</span>
+          </div>
+        </div>
+        <div class="card" style="background:rgba(255,179,71,.05);border-color:rgba(255,179,71,.2);">
+          <div class="sec-lbl" style="color:var(--amber);">Medical Disclaimer</div>
+          <div style="font-size:.88rem;color:rgba(220,232,240,.7);line-height:1.8;">HealthFusion AI is for Now
+            educational
+            and informational purposes only</div>
+        </div>
+      </div>
+
     </div>
+  </div>
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
@@ -2771,7 +2854,7 @@
     // ─────────────────────────────────────────────
     //  NAVIGATION
     // ─────────────────────────────────────────────
-    const pageNames = { dashboard: 'Dashboard', heart: '❤️ Heart Disease', diabetes: '🍬 Diabetes', disease: '🩺 Disease Checker', skin: '🔬 Skin Detection', monitor: '📊 Risk Monitor', reports: '📄 Reports', about: 'ℹ️ About' };
+    const pageNames = { dashboard: 'Dashboard', heart: '❤️ Heart Disease', diabetes: '🍬 Diabetes', disease: '🩺 Disease Checker', skin: '🔬 Skin Detection', brain: '🧠 Brain Tumor', monitor: '📊 Risk Monitor', reports: '📄 Reports', about: 'ℹ️ About' };
     function navigate(page) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -3082,6 +3165,94 @@
       { name: 'Squamous cell carcinoma', emoji: '🔴', sev: 'High', color: '#ef4444' },
       { name: 'Tinea Ringworm', emoji: '🟡', sev: 'Moderate', color: '#f59e0b' },
     ];
+
+    // ─────────────────────────────────────────────
+    //  BRAIN TUMOR DETECTION (YOLO + SAM2)
+    // ─────────────────────────────────────────────
+
+    function previewBrain(event) {
+      const file = event.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('brainUploadPlaceholder').style.display = 'none';
+        const prev = document.getElementById('brainPreview'); prev.src = e.target.result; prev.style.display = 'block';
+        document.getElementById('brainImgInfo').style.display = 'block';
+        document.getElementById('brainImgInfo').textContent = `📁 ${file.name} · ${(file.size / 1024).toFixed(1)} KB · ${file.type.split('/')[1].toUpperCase()}`;
+
+        // Reset results on new upload
+        document.getElementById('brainEmptyState').style.display = 'block';
+        document.getElementById('brainOutputContent').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleBrainDrop(e) {
+      e.preventDefault(); document.getElementById('brainUploadZone').classList.remove('drag');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const input = document.getElementById('brainInput');
+        const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files;
+        previewBrain({ target: input });
+      }
+    }
+
+    function switchBrainTab(btn, panelId) {
+      btn.closest('.card').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.closest('.card').querySelectorAll('.brain-tab-panel').forEach(p => p.style.display = 'none');
+      btn.classList.add('active');
+      document.getElementById(panelId).style.display = 'block';
+    }
+
+    async function analyzeBrain() {
+      const preview = document.getElementById('brainPreview');
+      if (preview.style.display === 'none') { toast('Upload a brain MRI first', 'error'); return; }
+      const input = document.getElementById('brainInput');
+      if (!input.files[0]) { toast('No image selected', 'error'); return; }
+
+      setLoading('brainBtn', true, 'Analyzing...');
+      try {
+        const formData = new FormData();
+        formData.append('file', input.files[0]);
+        const res = await fetch(`${API}/api/brain`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${sessionStorage.getItem('hf_token')}` },
+          body: formData
+        });
+        if (!res.ok) throw new Error((await res.json()).detail || 'Brain analysis failed');
+        const data = await res.json();
+
+        const top = data.predictions[0];
+        const isTumor = top.disease.toLowerCase() !== 'no tumor';
+
+        document.getElementById('brainEmptyState').style.display = 'none';
+        document.getElementById('brainOutputContent').style.display = 'block';
+
+        document.getElementById('brainDiagnosis').textContent = top.disease;
+        document.getElementById('brainConfidence').textContent = top.confidence + '%';
+        document.getElementById('brainDiagnosis').style.color = isTumor ? 'var(--rose)' : 'var(--teal)';
+        document.getElementById('brainBadge').style.color = isTumor ? 'var(--rose)' : 'var(--teal)';
+        document.getElementById('brainBadge').style.borderColor = isTumor ? 'rgba(255,78,106,0.4)' : 'rgba(0,229,195,0.4)';
+        document.getElementById('brainModelName').textContent = data.model;
+
+        // Set Image
+        document.getElementById('brainOrigImg').src = data.images.original;
+
+        // Render Differential
+        document.getElementById('brainDifferential').innerHTML = data.predictions.map((p, i) => {
+          const color = p.disease.toLowerCase() === 'no tumor' ? 'var(--teal)' : 'var(--rose)';
+          return `<div class="top3-row"><div class="top3-head"><span>${['🥇', '🥈', '🥉', '🏅'][i] || '🔸'} ${p.disease}</span><span class="top3-pct" style="color:${color};">${p.confidence}%</span></div><div class="prog-wrap"><div class="prog-bar" style="background:${color};width:${p.confidence}%;"></div></div></div>`;
+        }).join('');
+
+        // Update Hybrid AI context
+        currentPredictionContext = `Prediction Type: Brain Tumor\nPredicted Condition: ${top.disease}\nConfidence: ${top.confidence}%\nModel: ${data.model}`;
+
+        toast('Brain analysis complete 🧠');
+      } catch (e) {
+        toast(e.message, 'error');
+        if (e.message.includes('not found')) toast('Ensure best.pt is in models folder', 'error', 5000);
+      }
+      setLoading('brainBtn', false, '⚡ Run YOLOv11 & SAM2');
+    }
 
     function initSkinGrid() {
       document.getElementById('skinGrid').innerHTML = SKIN_DATA.map(c => `

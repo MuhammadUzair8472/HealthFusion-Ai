@@ -7,3 +7,6 @@ notebook/
 
 *.zip
 Output Images/
+vc_redist.x64.exe
+models/best.pt
+models/sam2_b.pt

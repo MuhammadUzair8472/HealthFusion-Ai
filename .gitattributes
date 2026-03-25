@@ -1,0 +1,4 @@
+models/*.pth filter=lfs diff=lfs merge=lfs -text
+models/heart_model.pkl filter=lfs diff=lfs merge=lfs -text
+models/diabetes_model.pkl filter=lfs diff=lfs merge=lfs -text
+models/disease_model.pkl filter=lfs diff=lfs merge=lfs -text
