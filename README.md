@@ -3,6 +3,12 @@
 > **An AI-powered multi-disease health prediction platform combining Classical ML, Deep Learning (PyTorch), and Generative AI (Gemini) into a single unified web application.**
 
 ---
+## 👨‍💻 Author
+
+**Muhammad Uzair**  
+HealthFusion AI v2 — An AI-powered multi-disease health prediction platform
+Github:https://muhammad-uzair-portfolio.netlify.app/
+
 
 ## 📋 Table of Contents
 
@@ -479,12 +485,7 @@ python-dotenv            # .env file support
 
 ---
 
-## 👨‍💻 Author
 
-**Muhammad Uzair**  
-HealthFusion AI v2 — An AI-powered multi-disease health prediction platform
-
----
 
 ## 📄 License
 
